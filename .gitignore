@@ -1,0 +1,18 @@
+# Backend (Spring Boot / Maven)
+backend/target/
+backend/.mvn/
+backend/src/main/resources/application.properties
+backend/src/main/resources/application-prod.properties
+*.jar
+*.log
+
+# Frontend (React / Vite)
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+
+# Entorno y editores
+.vscode/
+.idea/
+.DS_Store
