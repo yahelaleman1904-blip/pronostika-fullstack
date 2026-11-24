@@ -1,5 +1,30 @@
 import http, { getErrorMessage } from './http';
 
+const mapPronosticoToMatch = (p) => {
+  const local = p.equipoLocal || p.partido?.equipoLocal || '';
+  const visitante = p.equipoVisitante || p.partido?.equipoVisitante || '';
+  const title =
+    typeof p.partido === 'string'
+      ? p.partido
+      : local && visitante
+      ? `${local} vs ${visitante}`
+      : p.title || `Partido #${p.partidoId || p.id}`;
+
+  const category =
+    p.liga || p.ligaNombre || p.partido?.liga?.nombre || p.category || 'General';
+
+  return {
+    id: p.id,
+    partidoId: p.partidoId || p.partido?.id || 1,
+    title,
+    category,
+    ganadorPrevisto: p.ganadorPrevisto || 'Pendiente',
+    probabilidad: p.probabilidad ?? 50,
+    estado: p.estado || 'Pendiente',
+    fecha: p.fechaPartido || p.fecha || 'Próximamente',
+  };
+};
+
 export const authApi = {
   async login(email, password) {
     try {
@@ -27,7 +52,7 @@ export const authApi = {
     try {
       await http.post('/auth/logout');
     } catch {
-      // Aunque falle la red, limpiamos la sesión local
+      // Limpia sesión local aunque falle la red
     } finally {
       localStorage.removeItem('pronostika_token');
       localStorage.removeItem('pronostika_active_user');
@@ -82,4 +107,37 @@ export const pronosticosApi = {
       throw new Error(getErrorMessage(error, 'No se pudo eliminar el pronóstico.'));
     }
   },
+};
+
+// Funciones usadas por DashboardPage.jsx conectadas al backend real
+export const fetchMatches = async () => {
+  const data = await pronosticosApi.listar({ page: 0, size: 50 });
+  const items = Array.isArray(data) ? data : data?.content || [];
+  return items.map(mapPronosticoToMatch);
+};
+
+export const createMatchApi = async (formData) => {
+  const payload = {
+    partidoId: Number(formData.partidoId) || 1,
+    ganadorPrevisto: formData.ganadorPrevisto,
+    probabilidad: Number(formData.probabilidad) || 50,
+    estado: formData.estado || 'PENDIENTE',
+  };
+  const data = await pronosticosApi.crear(payload);
+  return mapPronosticoToMatch(data);
+};
+
+export const updateMatchApi = async (id, formData) => {
+  const payload = {
+    partidoId: Number(formData.partidoId) || 1,
+    ganadorPrevisto: formData.ganadorPrevisto,
+    probabilidad: Number(formData.probabilidad) || 50,
+    estado: formData.estado || 'PENDIENTE',
+  };
+  const data = await pronosticosApi.actualizar(id, payload);
+  return mapPronosticoToMatch(data);
+};
+
+export const deleteMatchApi = async (id) => {
+  return pronosticosApi.eliminar(id);
 };
