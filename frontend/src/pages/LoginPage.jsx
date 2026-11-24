@@ -3,24 +3,25 @@ import {
   Trophy,
   Mail,
   Lock,
-  User,
+  Phone,
   Eye,
   EyeOff,
   AlertCircle,
   CheckCircle2,
   X,
 } from 'lucide-react';
-import { loginUser, registerUserApi, socialLoginApi } from '../services/api';
+import { authApi } from '../services/api';
+
+const STRONG_PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#._-]).{8,}$/;
 
 export default function LoginPage({ onLoginSuccess }) {
-  // Modo: 'login' o 'register'
   const [mode, setMode] = useState('login');
 
   // Estados de formulario
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  const [nombre, setNombre] = useState('');
+  const [apellido, setApellido] = useState('');
   const [email, setEmail] = useState('');
-  const [username, setUsername] = useState('');
+  const [telefono, setTelefono] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
@@ -30,44 +31,38 @@ export default function LoginPage({ onLoginSuccess }) {
   const [successMsg, setSuccessMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Modal de Login Social (Google / GitHub)
-  const [socialProvider, setSocialProvider] = useState(null);
-  const [socialName, setSocialName] = useState('');
-  const [socialEmail, setSocialEmail] = useState('');
-
   // Modal de ¿Olvidaste tu contraseña?
   const [forgotOpen, setForgotOpen] = useState(false);
   const [recoveryEmail, setRecoveryEmail] = useState('');
-  const [recoverySent, setRecoverySent] = useState(false);
+  const [recoveryMsg, setRecoveryMsg] = useState('');
+  const [recoveryLoading, setRecoveryLoading] = useState(false);
 
   const validateForm = () => {
     const errors = {};
     let isValid = true;
 
     if (mode === 'register') {
-      if (!firstName.trim()) {
-        errors.firstName = 'Ingresa tu nombre.';
+      if (!nombre.trim()) {
+        errors.nombre = 'Ingresa tu nombre.';
         isValid = false;
       }
-      if (!lastName.trim()) {
-        errors.lastName = 'Ingresa tu apellido.';
-        isValid = false;
-      }
-      if (!email.trim() || !email.includes('@')) {
-        errors.email = 'Ingresa un correo válido.';
+      if (!apellido.trim()) {
+        errors.apellido = 'Ingresa tu apellido.';
         isValid = false;
       }
     }
 
-    if (!username.trim()) {
-      errors.username = 'Ingresa tu nombre de usuario.';
+    if (!email.trim() || !email.includes('@')) {
+      errors.email = 'Ingresa un correo electrónico válido.';
       isValid = false;
     }
+
     if (!password.trim()) {
       errors.password = 'Ingresa tu contraseña.';
       isValid = false;
-    } else if (password.trim().length < 4) {
-      errors.password = 'La contraseña debe tener mínimo 4 caracteres.';
+    } else if (mode === 'register' && !STRONG_PASSWORD_REGEX.test(password)) {
+      errors.password =
+        'Mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo (@$!%*?&#._-).';
       isValid = false;
     }
 
@@ -85,52 +80,37 @@ export default function LoginPage({ onLoginSuccess }) {
     setIsLoading(true);
     try {
       if (mode === 'login') {
-        const userData = await loginUser(username, password);
+        const userData = await authApi.login(email.trim(), password);
         onLoginSuccess(userData);
       } else {
-        const newUser = await registerUserApi({
-          firstName,
-          lastName,
-          username,
-          email,
+        const newUser = await authApi.register({
+          nombre: nombre.trim(),
+          apellido: apellido.trim(),
+          email: email.trim(),
+          telefono: telefono.trim() || null,
           password,
         });
         onLoginSuccess(newUser);
       }
     } catch (error) {
-      setApiError('Usuario o contraseña incorrectos. Verifica tus datos o regístrate.');
+      setApiError(error.message || 'Correo o contraseña incorrectos.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleOpenSocial = (provider) => {
-    setSocialProvider(provider);
-    setSocialName('Carlos Alemán');
-    setSocialEmail(
-      provider === 'Google' ? 'carlos.aleman@gmail.com' : 'yahelaleman1904@github.com'
-    );
-  };
-
-  const handleConfirmSocialLogin = async (e) => {
+  const handleRecoverySubmit = async (e) => {
     e.preventDefault();
-    if (!socialName.trim()) return;
-    setIsLoading(true);
+    if (!recoveryEmail.trim()) return;
+    setRecoveryLoading(true);
     try {
-      const userData = await socialLoginApi(socialProvider, socialName, socialEmail);
-      setSocialProvider(null);
-      onLoginSuccess(userData);
+      const res = await authApi.recuperarPassword(recoveryEmail.trim());
+      setRecoveryMsg(res?.mensaje || 'Si el correo existe, recibirás instrucciones.');
+    } catch (error) {
+      setRecoveryMsg(error.message || 'No se pudo procesar la solicitud.');
     } finally {
-      setIsLoading(false);
+      setRecoveryLoading(false);
     }
-  };
-
-  const fillDemoUser = (u, p) => {
-    setMode('login');
-    setUsername(u);
-    setPassword(p);
-    setFieldErrors({});
-    setApiError('');
   };
 
   return (
@@ -189,57 +169,9 @@ export default function LoginPage({ onLoginSuccess }) {
             </h2>
             <p className="text-[#94A3B8] text-sm">
               {mode === 'login'
-                ? 'Inicia sesión para continuar con tus pronósticos.'
-                : 'Regístrate por primera vez y comienza a pronosticar.'}
+                ? 'Inicia sesión con tu correo para continuar.'
+                : 'Regístrate y comienza a armar tus pronósticos y quinielas.'}
             </p>
-          </div>
-
-          {/* Botones de Inicio Rápido con Google y GitHub */}
-          <div className="grid grid-cols-2 gap-3 mb-5">
-            <button
-              type="button"
-              onClick={() => handleOpenSocial('Google')}
-              className="flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-xl bg-[#1E293B] hover:bg-[#334155] border border-[#334155] text-white text-sm font-medium transition cursor-pointer"
-            >
-              <svg className="w-4 h-4" viewBox="0 0 24 24">
-                <path
-                  fill="#EA4335"
-                  d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.8C6.2 7.2 8.9 5 12 5z"
-                />
-                <path
-                  fill="#4285F4"
-                  d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.6l3.7 2.9c2.2-2 3.7-5 3.7-8.7z"
-                />
-                <path
-                  fill="#FBBC05"
-                  d="M5.3 14.8c-.2-.8-.4-1.6-.4-2.5s.2-1.7.4-2.5L1.6 7C.6 9 0 11.2 0 13.5s.6 4.5 1.6 6.5l3.7-2.9z"
-                />
-                <path
-                  fill="#34A853"
-                  d="M12 24c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5l-3.7 2.9C3.5 21.4 7.4 24 12 24z"
-                />
-              </svg>
-              <span>Google</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleOpenSocial('GitHub')}
-              className="flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-xl bg-[#1E293B] hover:bg-[#334155] border border-[#334155] text-white text-sm font-medium transition cursor-pointer"
-            >
-              <svg className="w-4 h-4 fill-white" viewBox="0 0 24 24">
-                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
-              </svg>
-              <span>GitHub</span>
-            </button>
-          </div>
-
-          <div className="relative flex py-2 items-center mb-5">
-            <div className="grow border-t border-[#334155]"></div>
-            <span className="shrink mx-4 text-xs text-slate-500 uppercase">
-              O con tus credenciales
-            </span>
-            <div className="grow border-t border-[#334155]"></div>
           </div>
 
           {apiError && (
@@ -266,13 +198,15 @@ export default function LoginPage({ onLoginSuccess }) {
                     </label>
                     <input
                       type="text"
-                      value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
+                      value={nombre}
+                      onChange={(e) => setNombre(e.target.value)}
                       placeholder="Ej. Carlos"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#1E293B] border border-[#334155] text-white text-sm focus:outline-none focus:border-[#10B981]"
+                      className={`w-full px-3.5 py-2.5 rounded-xl bg-[#1E293B] border ${
+                        fieldErrors.nombre ? 'border-red-500' : 'border-[#334155]'
+                      } text-white text-sm focus:outline-none focus:border-[#10B981]`}
                     />
-                    {fieldErrors.firstName && (
-                      <p className="mt-1 text-xs text-red-400">{fieldErrors.firstName}</p>
+                    {fieldErrors.nombre && (
+                      <p className="mt-1 text-xs text-red-400">{fieldErrors.nombre}</p>
                     )}
                   </div>
                   <div>
@@ -281,57 +215,56 @@ export default function LoginPage({ onLoginSuccess }) {
                     </label>
                     <input
                       type="text"
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
+                      value={apellido}
+                      onChange={(e) => setApellido(e.target.value)}
                       placeholder="Ej. Alemán"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#1E293B] border border-[#334155] text-white text-sm focus:outline-none focus:border-[#10B981]"
+                      className={`w-full px-3.5 py-2.5 rounded-xl bg-[#1E293B] border ${
+                        fieldErrors.apellido ? 'border-red-500' : 'border-[#334155]'
+                      } text-white text-sm focus:outline-none focus:border-[#10B981]`}
                     />
-                    {fieldErrors.lastName && (
-                      <p className="mt-1 text-xs text-red-400">{fieldErrors.lastName}</p>
+                    {fieldErrors.apellido && (
+                      <p className="mt-1 text-xs text-red-400">{fieldErrors.apellido}</p>
                     )}
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-xs font-medium text-slate-200 mb-1.5">
-                    Correo electrónico
+                    Teléfono (opcional, para alertas SMS/WhatsApp)
                   </label>
                   <div className="relative">
-                    <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                     <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="tu@correo.com"
+                      type="tel"
+                      value={telefono}
+                      onChange={(e) => setTelefono(e.target.value)}
+                      placeholder="+52 951 123 4567"
                       className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#1E293B] border border-[#334155] text-white text-sm focus:outline-none focus:border-[#10B981]"
                     />
                   </div>
-                  {fieldErrors.email && (
-                    <p className="mt-1 text-xs text-red-400">{fieldErrors.email}</p>
-                  )}
                 </div>
               </>
             )}
 
-            {/* Usuario */}
+            {/* Correo electrónico */}
             <div>
               <label className="block text-xs font-medium text-slate-200 mb-1.5">
-                Usuario {mode === 'login' && 'o Correo'}
+                Correo electrónico
               </label>
               <div className="relative">
-                <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Ej. emilys o tu usuario"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="tu@correo.com"
                   className={`w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#1E293B] border ${
-                    fieldErrors.username ? 'border-red-500' : 'border-[#334155]'
+                    fieldErrors.email ? 'border-red-500' : 'border-[#334155]'
                   } text-white text-sm focus:outline-none focus:border-[#10B981]`}
                 />
               </div>
-              {fieldErrors.username && (
-                <p className="mt-1 text-xs text-red-400">{fieldErrors.username}</p>
+              {fieldErrors.email && (
+                <p className="mt-1 text-xs text-red-400">{fieldErrors.email}</p>
               )}
             </div>
 
@@ -344,7 +277,8 @@ export default function LoginPage({ onLoginSuccess }) {
                     type="button"
                     onClick={() => {
                       setForgotOpen(true);
-                      setRecoverySent(false);
+                      setRecoveryMsg('');
+                      setRecoveryEmail(email);
                     }}
                     className="text-xs text-[#10B981] hover:underline cursor-pointer"
                   >
@@ -375,38 +309,6 @@ export default function LoginPage({ onLoginSuccess }) {
                 <p className="mt-1 text-xs text-red-400">{fieldErrors.password}</p>
               )}
             </div>
-
-            {/* Botones rápidos de cuentas de DummyJSON */}
-            {mode === 'login' && (
-              <div className="p-3 rounded-xl bg-[#1E293B]/60 border border-[#334155]">
-                <p className="text-[11px] text-[#94A3B8] mb-2">
-                  Cuentas oficiales de DummyJSON (clic para autocompletar):
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() => fillDemoUser('emilys', 'emilyspass')}
-                    className="px-2.5 py-1 rounded-lg bg-[#0F172A] hover:bg-[#10B981]/20 border border-[#334155] text-xs text-[#10B981] font-medium cursor-pointer"
-                  >
-                    Emily (emilys)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => fillDemoUser('michaelw', 'michaelwpass')}
-                    className="px-2.5 py-1 rounded-lg bg-[#0F172A] hover:bg-[#10B981]/20 border border-[#334155] text-xs text-[#10B981] font-medium cursor-pointer"
-                  >
-                    Michael (michaelw)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => fillDemoUser('sophiab', 'sophiabpass')}
-                    className="px-2.5 py-1 rounded-lg bg-[#0F172A] hover:bg-[#10B981]/20 border border-[#334155] text-xs text-[#10B981] font-medium cursor-pointer"
-                  >
-                    Sophia (sophiab)
-                  </button>
-                </div>
-              </div>
-            )}
 
             <button
               type="submit"
@@ -458,58 +360,6 @@ export default function LoginPage({ onLoginSuccess }) {
         </div>
       </div>
 
-      {/* Modal interactivo para Login con Google / GitHub */}
-      {socialProvider && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4">
-          <div className="w-full max-w-sm rounded-2xl bg-[#1E293B] border border-[#334155] p-6 shadow-2xl">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-bold text-white">
-                Continuar con {socialProvider}
-              </h3>
-              <button
-                onClick={() => setSocialProvider(null)}
-                className="text-slate-400 hover:text-white cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <p className="text-xs text-[#94A3B8] mb-4">
-              Ingresa tu nombre para personalizar tu perfil en el Dashboard de Pronostika:
-            </p>
-            <form onSubmit={handleConfirmSocialLogin} className="space-y-3">
-              <div>
-                <label className="block text-xs text-slate-300 mb-1">Tu Nombre y Apellido</label>
-                <input
-                  type="text"
-                  required
-                  value={socialName}
-                  onChange={(e) => setSocialName(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-[#0F172A] border border-[#334155] text-white text-sm focus:outline-none focus:border-[#10B981]"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-slate-300 mb-1">
-                  Correo de {socialProvider}
-                </label>
-                <input
-                  type="email"
-                  required
-                  value={socialEmail}
-                  onChange={(e) => setSocialEmail(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-[#0F172A] border border-[#334155] text-white text-sm focus:outline-none focus:border-[#10B981]"
-                />
-              </div>
-              <button
-                type="submit"
-                className="w-full mt-2 py-2.5 rounded-xl bg-[#10B981] hover:bg-[#059669] text-slate-950 font-bold text-sm cursor-pointer"
-              >
-                Autenticar como {socialName || 'Usuario'}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
       {/* Modal de Recuperación de Contraseña */}
       {forgotOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4">
@@ -523,13 +373,11 @@ export default function LoginPage({ onLoginSuccess }) {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            {recoverySent ? (
+            {recoveryMsg ? (
               <div className="text-center py-4">
                 <CheckCircle2 className="w-10 h-10 text-[#10B981] mx-auto mb-3" />
-                <p className="text-sm text-white font-semibold mb-1">¡Enlace enviado!</p>
-                <p className="text-xs text-[#94A3B8] mb-4">
-                  Enviamos las instrucciones de acceso a {recoveryEmail}.
-                </p>
+                <p className="text-sm text-white font-semibold mb-1">Solicitud enviada</p>
+                <p className="text-xs text-[#94A3B8] mb-4">{recoveryMsg}</p>
                 <button
                   onClick={() => setForgotOpen(false)}
                   className="w-full py-2 rounded-xl bg-[#10B981] text-slate-950 font-bold text-xs cursor-pointer"
@@ -538,15 +386,9 @@ export default function LoginPage({ onLoginSuccess }) {
                 </button>
               </div>
             ) : (
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  if (recoveryEmail.trim()) setRecoverySent(true);
-                }}
-                className="space-y-3"
-              >
+              <form onSubmit={handleRecoverySubmit} className="space-y-3">
                 <p className="text-xs text-[#94A3B8]">
-                  Ingresa tu correo y te enviaremos un enlace temporal para restablecer tu acceso.
+                  Ingresa tu correo y te enviaremos instrucciones para restablecer tu acceso.
                 </p>
                 <input
                   type="email"
@@ -558,9 +400,10 @@ export default function LoginPage({ onLoginSuccess }) {
                 />
                 <button
                   type="submit"
-                  className="w-full py-2.5 rounded-xl bg-[#10B981] hover:bg-[#059669] text-slate-950 font-bold text-sm cursor-pointer"
+                  disabled={recoveryLoading}
+                  className="w-full py-2.5 rounded-xl bg-[#10B981] hover:bg-[#059669] text-slate-950 font-bold text-sm cursor-pointer disabled:opacity-60"
                 >
-                  Enviar enlace
+                  {recoveryLoading ? 'Enviando...' : 'Enviar enlace'}
                 </button>
               </form>
             )}
