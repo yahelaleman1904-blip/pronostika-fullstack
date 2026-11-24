@@ -1,0 +1,33 @@
+meta {
+  name: 400 seleccion no valida
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/quinielas
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{usuarioToken}}
+}
+
+body:json {
+  {
+    "nombreJornada": "Jornada 12",
+    "selecciones": [
+      {
+        "partidoId": 1,
+        "seleccion": "GANA"
+      }
+    ]
+  }
+}
+
+tests {
+  test("responde 400", function () {
+    expect(res.status).to.equal(400);
+  });
+}

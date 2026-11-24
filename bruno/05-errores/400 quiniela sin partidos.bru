@@ -1,0 +1,28 @@
+meta {
+  name: 400 quiniela sin partidos
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/quinielas
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{usuarioToken}}
+}
+
+body:json {
+  {
+    "nombreJornada": "Jornada vacía",
+    "selecciones": []
+  }
+}
+
+tests {
+  test("responde 400", function () {
+    expect(res.status).to.equal(400);
+  });
+}

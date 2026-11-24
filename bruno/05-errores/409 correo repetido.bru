@@ -1,0 +1,30 @@
+meta {
+  name: 409 correo repetido
+  type: http
+  seq: 11
+}
+
+post {
+  url: {{baseUrl}}/admin/usuarios
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "nombre": "Admin",
+    "apellido": "Duplicado",
+    "email": "{{adminEmail}}",
+    "password": "Cambiar123"
+  }
+}
+
+tests {
+  test("responde 409", function () {
+    expect(res.status).to.equal(409);
+  });
+}

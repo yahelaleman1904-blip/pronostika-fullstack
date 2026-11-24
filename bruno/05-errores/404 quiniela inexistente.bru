@@ -1,0 +1,21 @@
+meta {
+  name: 404 quiniela inexistente
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{baseUrl}}/quinielas/999999
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{usuarioToken}}
+}
+
+tests {
+  test("responde 404", function () {
+    expect(res.status).to.equal(404);
+  });
+}
