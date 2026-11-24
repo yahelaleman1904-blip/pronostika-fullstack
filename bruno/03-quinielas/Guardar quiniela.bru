@@ -1,0 +1,51 @@
+meta {
+  name: Guardar quiniela
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/quinielas
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{usuarioToken}}
+}
+
+body:json {
+  {
+    "nombreJornada": "Jornada 12",
+    "selecciones": [
+      {
+        "partidoId": "{{partidoId1}}",
+        "seleccion": "LOCAL"
+      },
+      {
+        "partidoId": "{{partidoId2}}",
+        "seleccion": "EMPATE"
+      }
+    ]
+  }
+}
+
+script:post-response {
+if (res.status === 201) {
+  bru.setEnvVar("quinielaId", res.body.quiniela.id);
+}
+}
+
+tests {
+  test("responde 201", function () {
+    expect(res.status).to.equal(201);
+  });
+  test("guarda la relación con partidos", function () {
+    expect(res.body.quiniela.partidos).to.have.lengthOf(2);
+  });
+}
+
+docs {
+Requiere que existan partidos con los ids partidoId1 y partidoId2.
+Si el usuario tiene teléfono y Twilio está configurado, smsEnviado y whatsappEnviado vienen en true.
+}
