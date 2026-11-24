@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiniela registrada - Pronostika</title>
+  <!--
+    Variables a reemplazar: {{nombre}}, {{folio}}, {{nombreJornada}}, {{totalPartidos}},
+    {{fechaRegistro}}, {{filasPartidos}}, {{urlQuiniela}}, {{anio}}
+
+    {{filasPartidos}} se arma repitiendo esta fila por cada partido:
+    <tr>
+      <td style="padding:12px 16px; border-top:1px solid #334155; font-size:14px; color:#F8FAFC;">LOCAL vs VISITANTE</td>
+      <td style="padding:12px 16px; border-top:1px solid #334155; font-size:13px; color:#94A3B8;">FECHA</td>
+      <td style="padding:12px 16px; border-top:1px solid #334155; font-size:13px; font-weight:bold; color:#10B981; text-align:right;">SELECCION</td>
+    </tr>
+  -->
+</head>
+<body style="margin:0; padding:0; background-color:#0F172A; font-family:Arial, Helvetica, sans-serif;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#0F172A;">
+    <tr>
+      <td align="center" style="padding:32px 16px;">
+        <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px; width:100%; background-color:#1E293B; border:1px solid #334155; border-radius:16px;">
+          <tr>
+            <td style="padding:28px 32px; border-bottom:1px solid #334155;">
+              <span style="display:inline-block; width:36px; height:36px; line-height:36px; text-align:center; border-radius:10px; background-color:#10B981; color:#0F172A; font-weight:bold; font-size:18px;">P</span>
+              <span style="font-size:22px; font-weight:bold; color:#F8FAFC; vertical-align:middle; padding-left:8px;">Pronostika</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:32px;">
+              <p style="margin:0 0 8px; font-size:12px; letter-spacing:2px; text-transform:uppercase; color:#10B981; font-weight:bold;">Quiniela registrada</p>
+              <h1 style="margin:0 0 16px; font-size:26px; color:#F8FAFC;">¡Listo, {{nombre}}!</h1>
+              <p style="margin:0 0 24px; font-size:15px; line-height:24px; color:#CBD5E1;">
+                Guardamos tu quiniela de <strong style="color:#F8FAFC;">{{nombreJornada}}</strong>.
+                Estos son tus pronósticos:
+              </p>
+
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-bottom:24px;">
+                <tr>
+                  <td width="33%" style="padding:14px; background-color:#0F172A; border:1px solid #334155; border-radius:12px; text-align:center;">
+                    <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#64748B;">Folio</div>
+                    <div style="font-size:18px; font-weight:bold; color:#F8FAFC;">#{{folio}}</div>
+                  </td>
+                  <td width="2%"></td>
+                  <td width="32%" style="padding:14px; background-color:#0F172A; border:1px solid #334155; border-radius:12px; text-align:center;">
+                    <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#64748B;">Partidos</div>
+                    <div style="font-size:18px; font-weight:bold; color:#10B981;">{{totalPartidos}}</div>
+                  </td>
+                  <td width="2%"></td>
+                  <td width="33%" style="padding:14px; background-color:#0F172A; border:1px solid #334155; border-radius:12px; text-align:center;">
+                    <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#64748B;">Registro</div>
+                    <div style="font-size:14px; font-weight:bold; color:#F8FAFC;">{{fechaRegistro}}</div>
+                  </td>
+                </tr>
+              </table>
+
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#0F172A; border:1px solid #334155; border-radius:12px;">
+                <tr>
+                  <th align="left" style="padding:12px 16px; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#64748B;">Partido</th>
+                  <th align="left" style="padding:12px 16px; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#64748B;">Fecha</th>
+                  <th align="right" style="padding:12px 16px; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#64748B;">Tu pick</th>
+                </tr>
+                {{filasPartidos}}
+              </table>
+
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:28px 0 0;">
+                <tr>
+                  <td style="border-radius:12px; background-color:#10B981;">
+                    <a href="{{urlQuiniela}}" style="display:inline-block; padding:14px 28px; font-size:15px; font-weight:bold; color:#0F172A; text-decoration:none;">Ver mi quiniela</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:20px 32px; border-top:1px solid #334155; font-size:12px; line-height:18px; color:#64748B; text-align:center;">
+              También te enviamos la confirmación por SMS y WhatsApp si registraste tu teléfono.<br>
+              &copy; {{anio}} Pronostika
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
