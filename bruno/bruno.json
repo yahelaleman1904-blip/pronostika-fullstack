@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "Pronostika API",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}
