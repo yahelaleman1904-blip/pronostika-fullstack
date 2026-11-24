@@ -1,0 +1,25 @@
+meta {
+  name: Listar usuarios paginado
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/admin/usuarios?page=0&size=10&sort=nombre,asc
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+tests {
+  test("responde 200", function () {
+    expect(res.status).to.equal(200);
+  });
+  test("regresa una página", function () {
+    expect(res.body.contenido).to.be.an("array");
+    expect(res.body).to.have.property("totalElementos");
+  });
+}

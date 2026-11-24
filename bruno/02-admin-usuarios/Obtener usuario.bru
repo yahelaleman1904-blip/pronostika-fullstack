@@ -1,0 +1,21 @@
+meta {
+  name: Obtener usuario
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/admin/usuarios/{{usuarioCreadoId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+tests {
+  test("responde 200", function () {
+    expect(res.status).to.equal(200);
+  });
+}

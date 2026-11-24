@@ -1,0 +1,25 @@
+meta {
+  name: Buscar por nombre o correo
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/admin/usuarios?buscar=mario&page=0&size=5
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+tests {
+  test("responde 200", function () {
+    expect(res.status).to.equal(200);
+  });
+  test("regresa una página", function () {
+    expect(res.body.contenido).to.be.an("array");
+    expect(res.body).to.have.property("totalElementos");
+  });
+}

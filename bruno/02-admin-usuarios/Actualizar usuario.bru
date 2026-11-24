@@ -1,0 +1,31 @@
+meta {
+  name: Actualizar usuario
+  type: http
+  seq: 6
+}
+
+put {
+  url: {{baseUrl}}/admin/usuarios/{{usuarioCreadoId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "nombre": "Prueba",
+    "apellido": "Editada",
+    "email": "prueba.bruno@pronostika.com",
+    "telefono": "+529519876543",
+    "activo": true
+  }
+}
+
+tests {
+  test("responde 200", function () {
+    expect(res.status).to.equal(200);
+  });
+}

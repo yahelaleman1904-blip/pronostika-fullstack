@@ -1,0 +1,30 @@
+meta {
+  name: Cambiar rol
+  type: http
+  seq: 7
+}
+
+patch {
+  url: {{baseUrl}}/admin/usuarios/{{usuarioCreadoId}}/rol
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "rol": "ANALISTA"
+  }
+}
+
+tests {
+  test("responde 200", function () {
+    expect(res.status).to.equal(200);
+  });
+  test("el rol cambió", function () {
+    expect(res.body.rol).to.equal("ANALISTA");
+  });
+}
