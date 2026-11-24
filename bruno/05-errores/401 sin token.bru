@@ -1,0 +1,21 @@
+meta {
+  name: 401 sin token
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/admin/usuarios
+  body: none
+  auth: none
+}
+
+tests {
+  test("responde 401", function () {
+    expect(res.status).to.equal(401);
+  });
+}
+
+docs {
+Petición sin encabezado Authorization: el filtro JWT debe responder 401.
+}

@@ -1,0 +1,33 @@
+meta {
+  name: 404 partido inexistente en quiniela
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{baseUrl}}/quinielas
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{usuarioToken}}
+}
+
+body:json {
+  {
+    "nombreJornada": "Jornada 99",
+    "selecciones": [
+      {
+        "partidoId": 999999,
+        "seleccion": "VISITA"
+      }
+    ]
+  }
+}
+
+tests {
+  test("responde 404", function () {
+    expect(res.status).to.equal(404);
+  });
+}

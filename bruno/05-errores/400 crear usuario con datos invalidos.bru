@@ -1,0 +1,34 @@
+meta {
+  name: 400 crear usuario con datos invalidos
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/admin/usuarios
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "nombre": "",
+    "apellido": "X",
+    "email": "no-es-correo",
+    "password": "123",
+    "rol": "JEFE"
+  }
+}
+
+tests {
+  test("responde 400", function () {
+    expect(res.status).to.equal(400);
+  });
+  test("indica los campos inválidos", function () {
+    expect(res.body.campos).to.have.property("email");
+  });
+}

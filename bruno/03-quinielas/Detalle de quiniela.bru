@@ -1,0 +1,21 @@
+meta {
+  name: Detalle de quiniela
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/quinielas/{{quinielaId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{usuarioToken}}
+}
+
+tests {
+  test("responde 200", function () {
+    expect(res.status).to.equal(200);
+  });
+}

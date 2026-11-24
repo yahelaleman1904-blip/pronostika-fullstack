@@ -1,0 +1,41 @@
+meta {
+  name: Crear usuario
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/admin/usuarios
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "nombre": "Prueba",
+    "apellido": "Bruno",
+    "email": "prueba.bruno@pronostika.com",
+    "password": "Cambiar123",
+    "telefono": "+529511234567",
+    "rol": "USUARIO"
+  }
+}
+
+script:post-response {
+if (res.status === 201) {
+  bru.setEnvVar("usuarioCreadoId", res.body.id);
+}
+}
+
+tests {
+  test("responde 201", function () {
+    expect(res.status).to.equal(201);
+  });
+  test("no expone la contraseña", function () {
+    expect(res.body).to.not.have.property("password");
+  });
+}

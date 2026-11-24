@@ -1,0 +1,25 @@
+meta {
+  name: 403 usuario normal en panel admin
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/admin/usuarios
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{usuarioToken}}
+}
+
+tests {
+  test("responde 403", function () {
+    expect(res.status).to.equal(403);
+  });
+}
+
+docs {
+Un ROLE_USUARIO no puede entrar a /api/admin/usuarios (PreAuthorize hasRole ADMIN).
+}

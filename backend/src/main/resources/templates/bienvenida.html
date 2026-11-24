@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bienvenido a Pronostika</title>
+  <!--
+    Variables a reemplazar: {{nombre}}, {{email}}, {{urlLogin}}, {{anio}}
+  -->
+</head>
+<body style="margin:0; padding:0; background-color:#0F172A; font-family:Arial, Helvetica, sans-serif;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#0F172A;">
+    <tr>
+      <td align="center" style="padding:32px 16px;">
+        <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px; width:100%; background-color:#1E293B; border:1px solid #334155; border-radius:16px;">
+          <tr>
+            <td style="padding:28px 32px; border-bottom:1px solid #334155;">
+              <span style="display:inline-block; width:36px; height:36px; line-height:36px; text-align:center; border-radius:10px; background-color:#10B981; color:#0F172A; font-weight:bold; font-size:18px;">P</span>
+              <span style="font-size:22px; font-weight:bold; color:#F8FAFC; vertical-align:middle; padding-left:8px;">Pronostika</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:32px;">
+              <p style="margin:0 0 8px; font-size:12px; letter-spacing:2px; text-transform:uppercase; color:#10B981; font-weight:bold;">Cuenta creada</p>
+              <h1 style="margin:0 0 16px; font-size:26px; color:#F8FAFC;">¡Bienvenido, {{nombre}}!</h1>
+              <p style="margin:0 0 16px; font-size:15px; line-height:24px; color:#CBD5E1;">
+                Tu cuenta en Pronostika quedó registrada con el correo
+                <strong style="color:#F8FAFC;">{{email}}</strong>. Ya puedes revisar los partidos de la jornada,
+                registrar tus pronósticos y armar tu quiniela.
+              </p>
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:24px 0;">
+                <tr>
+                  <td style="border-radius:12px; background-color:#10B981;">
+                    <a href="{{urlLogin}}" style="display:inline-block; padding:14px 28px; font-size:15px; font-weight:bold; color:#0F172A; text-decoration:none;">Iniciar sesión</a>
+                  </td>
+                </tr>
+              </table>
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#0F172A; border:1px solid #334155; border-radius:12px;">
+                <tr>
+                  <td style="padding:16px 20px; font-size:14px; line-height:22px; color:#94A3B8;">
+                    <strong style="color:#10B981;">Tip:</strong> agrega tu teléfono en tu perfil para recibir
+                    la confirmación de tus quinielas por SMS y WhatsApp.
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:20px 32px; border-top:1px solid #334155; font-size:12px; line-height:18px; color:#64748B; text-align:center;">
+              Recibiste este correo porque se creó una cuenta en Pronostika con esta dirección.<br>
+              &copy; {{anio}} Pronostika
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

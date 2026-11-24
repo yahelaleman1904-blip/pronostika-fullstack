@@ -1,0 +1,27 @@
+meta {
+  name: 400 telefono invalido en perfil
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/perfil
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{usuarioToken}}
+}
+
+body:json {
+  {
+    "telefono": "123"
+  }
+}
+
+tests {
+  test("responde 400", function () {
+    expect(res.status).to.equal(400);
+  });
+}

@@ -1,0 +1,28 @@
+meta {
+  name: Actualizar telefono
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{baseUrl}}/perfil
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{usuarioToken}}
+}
+
+body:json {
+  {
+    "telefono": "+529511234567",
+    "avatarUrl": ""
+  }
+}
+
+tests {
+  test("responde 200", function () {
+    expect(res.status).to.equal(200);
+  });
+}
