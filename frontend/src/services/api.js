@@ -3,12 +3,18 @@ import http, { getErrorMessage } from './http';
 const mapPronosticoToMatch = (p) => {
   const local = p.equipoLocal || p.partido?.equipoLocal || '';
   const visitante = p.equipoVisitante || p.partido?.equipoVisitante || '';
+  const vsString = Object.values(p).find(
+    (v) => typeof v === 'string' && v.includes(' vs ')
+  );
+
   const title =
-    typeof p.partido === 'string'
-      ? p.partido
-      : local && visitante
-      ? `${local} vs ${visitante}`
-      : p.title || `Partido #${p.partidoId || p.id}`;
+    (typeof p.partido === 'string' && p.partido) ||
+    p.partidoNombre ||
+    p.nombrePartido ||
+    p.encuentro ||
+    p.titulo ||
+    vsString ||
+    (local && visitante ? `${local} vs ${visitante}` : `Partido #${p.partidoId || p.id}`);
 
   const category =
     p.liga || p.ligaNombre || p.partido?.liga?.nombre || p.category || 'General';
