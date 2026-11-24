@@ -1,4 +1,5 @@
 import { Search, Plus, Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { getTeamLogo, getLeagueLogo, parseTeams } from '../utils/teamLogos';
 
 const formatFecha = (raw) => {
   if (!raw || raw === 'Próximamente') return 'Próximamente';
@@ -23,6 +24,7 @@ export default function MatchTable({
   setCurrentPage,
   limit,
   setLimit,
+  onSelectMatch,
   onOpenAdd,
   onOpenEdit,
   onOpenDelete,
@@ -85,7 +87,7 @@ export default function MatchTable({
             </span>
           </div>
           <p className="text-xs text-[#94A3B8] mt-1 tabular-nums">
-            {totalRecords} pronósticos activos en base de datos
+            {totalRecords} pronósticos activos · Haz clic en cualquier fila para ver estadísticas
           </p>
         </div>
 
@@ -153,29 +155,39 @@ export default function MatchTable({
             ) : (
               paginatedMatches.map((item) => {
                 const badge = badgeStyle(item.estado);
+                const { local, away } = parseTeams(item.title);
+                const localLogo = getTeamLogo(local);
+                const awayLogo = getTeamLogo(away);
+                const leagueLogo = getLeagueLogo(item.category);
+
                 return (
-                  <tr key={item.id} className="hover:bg-white/4 transition-colors">
+                  <tr
+                    key={item.id}
+                    onClick={() => onSelectMatch && onSelectMatch(item)}
+                    className="hover:bg-white/5 transition-colors cursor-pointer"
+                  >
                     <td className="py-4 px-6 font-semibold text-white">
-                      <div className="flex items-center gap-3">
-                        {item.localLogo && (
-                          <img
-                            src={item.localLogo}
-                            alt={item.localName}
-                            className="w-6 h-6 object-contain"
-                          />
+                      <div className="flex items-center gap-2.5">
+                        {localLogo && (
+                          <img src={localLogo} alt={local} className="w-6 h-6 object-contain" />
                         )}
-                        <span>{item.title}</span>
-                        {item.awayLogo && (
-                          <img
-                            src={item.awayLogo}
-                            alt={item.awayName}
-                            className="w-6 h-6 object-contain"
-                          />
+                        <span className="font-display font-bold">{local}</span>
+                        <span className="text-[11px] font-bold text-slate-500">vs</span>
+                        <span className="font-display font-bold">{away}</span>
+                        {awayLogo && (
+                          <img src={awayLogo} alt={away} className="w-6 h-6 object-contain" />
                         )}
                       </div>
                     </td>
                     <td className="py-4 px-4">
-                      <span className="px-2.5 py-1 rounded-lg bg-[#0F172A]/70 border border-white/8 text-xs font-medium text-slate-300">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#0F172A]/70 border border-white/8 text-xs font-medium text-slate-300">
+                        {leagueLogo && (
+                          <img
+                            src={leagueLogo}
+                            alt={item.category}
+                            className="w-4 h-4 object-contain"
+                          />
+                        )}
                         {item.category}
                       </span>
                     </td>
@@ -210,7 +222,10 @@ export default function MatchTable({
                         {badge.label}
                       </span>
                     </td>
-                    <td className="py-4 px-6 text-right">
+                    <td
+                      className="py-4 px-6 text-right"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <div className="inline-flex items-center gap-2">
                         <button
                           onClick={() => onOpenEdit(item)}
