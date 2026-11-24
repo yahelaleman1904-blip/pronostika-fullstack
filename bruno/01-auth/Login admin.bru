@@ -1,0 +1,39 @@
+meta {
+  name: Login admin
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/auth/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "{{adminEmail}}",
+    "password": "{{adminPassword}}"
+  }
+}
+
+script:post-response {
+if (res.status === 200) {
+  const token = res.body.token || res.body.accessToken || res.body.jwt;
+  bru.setEnvVar("adminToken", token);
+}
+}
+
+tests {
+  test("responde 200", function () {
+    expect(res.status).to.equal(200);
+  });
+  test("regresa un JWT", function () {
+    expect(res.body.token || res.body.accessToken || res.body.jwt).to.be.a("string");
+  });
+}
+
+docs {
+Inicia sesión con la cuenta ADMIN y guarda el JWT en la variable adminToken.
+La contraseña se escribe solo en el entorno local de Bruno (variable secreta), nunca en el repo.
+}
