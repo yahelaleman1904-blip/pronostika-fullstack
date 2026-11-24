@@ -12,8 +12,11 @@ import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import MatchTable from '../components/MatchTable';
 import MatchCardsGrid from '../components/MatchCardsGrid';
+import MatchDetailModal from '../components/MatchDetailModal';
 import CrudModal from '../components/CrudModal';
 import ConfirmModal from '../components/ConfirmModal';
+import ProfilePage from './ProfilePage';
+import AdminUsersPage from './AdminUsersPage';
 import {
   fetchMatches,
   createMatchApi,
@@ -50,16 +53,16 @@ export default function DashboardPage({ user, onLogout }) {
   const [currentPage, setCurrentPage] = useState(getInitialPage);
   const [limit, setLimit] = useState(getInitialLimit);
 
-  // Modales CRUD
+  // Modales CRUD y Detalle Sofascore
   const [isCrudModalOpen, setIsCrudModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+  const [selectedMatch, setSelectedMatch] = useState(null);
   const [itemToDelete, setItemToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const displayName = user?.nombre || user?.firstName || 'Analista';
   const displayLastName = user?.apellido || user?.lastName || '';
 
-  // Sincronizar URL (?page=X&limit=Y)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     params.set('page', currentPage);
@@ -157,13 +160,13 @@ export default function DashboardPage({ user, onLogout }) {
     <div className="relative min-h-screen flex bg-[#0F172A] text-[#F8FAFC] overflow-x-hidden">
       {/* Fondo ambiental sutil con movimiento lento */}
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-        <div className="absolute inset-0 bg-subtle-grid opacity-80" />
-        <div className="absolute -top-40 -left-24 w-[520px] h-[520px] rounded-full bg-[#10B981]/[0.07] blur-[130px] animate-ambient-slow" />
-        <div className="absolute -bottom-48 -right-24 w-[560px] h-[560px] rounded-full bg-[#38BDF8]/[0.05] blur-[140px] animate-ambient-slower" />
+        <div className="absolute inset-0 bg-subtle-grid opacity-90" />
+        <div className="absolute -top-32 -left-20 w-130 h-130 rounded-full bg-[#10B981]/14 blur-[120px] animate-ambient-slow" />
+        <div className="absolute -bottom-40 -right-20 w-140 h-140 rounded-full bg-[#38BDF8]/10 blur-[130px] animate-ambient-slower" />
       </div>
 
       <div className="relative z-10 flex w-full min-h-screen">
-        <Sidebar activeView={activeView} setActiveView={setActiveView} />
+        <Sidebar activeView={activeView} setActiveView={setActiveView} user={user} />
 
         <div className="flex-1 flex flex-col min-w-0">
           <Navbar
@@ -176,7 +179,7 @@ export default function DashboardPage({ user, onLogout }) {
             }}
           />
 
-          <main className="p-6 lg:p-8 space-y-7 overflow-y-auto max-w-[1440px] w-full mx-auto">
+          <main className="p-6 lg:p-8 space-y-7 overflow-y-auto max-w-360 w-full mx-auto">
             {/* Encabezado */}
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
               <div>
@@ -298,18 +301,18 @@ export default function DashboardPage({ user, onLogout }) {
                 <p className="font-bold mb-1">Ocurrió un problema al cargar los datos</p>
                 <p className="text-sm opacity-90">{errorMsg}</p>
               </div>
+            ) : activeView === 'perfil' ? (
+              <ProfilePage user={user} />
+            ) : activeView === 'admin' ? (
+              <AdminUsersPage currentUser={user} />
             ) : activeView === 'partidos' ? (
               <MatchCardsGrid
                 matches={matches}
-                onSelectForEdit={(item) => {
-                  setEditingItem(item);
-                  setIsCrudModalOpen(true);
-                }}
+                onSelectForEdit={(item) => setSelectedMatch(item)}
               />
             ) : activeView === 'quiniela' ? (
-              /* VISTA 3: MI QUINIELA INTERACTIVA */
               <div className="glass-panel rounded-2xl p-6 space-y-5">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.07] pb-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/8 pb-5">
                   <div>
                     <h3 className="text-lg font-bold tracking-tight text-white">
                       Boleta Oficial · Jornada 12 ({displayName})
@@ -336,7 +339,7 @@ export default function DashboardPage({ user, onLogout }) {
                     return (
                       <div
                         key={item.id}
-                        className="p-4 rounded-xl bg-[#0F172A]/75 border border-white/[0.06] hover:border-white/[0.12] transition flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                        className="p-4 rounded-xl bg-[#0F172A]/75 border border-white/6 hover:border-white/12 transition flex flex-col sm:flex-row sm:items-center justify-between gap-4"
                       >
                         <div>
                           <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-[#10B981] bg-[#10B981]/10 px-2 py-0.5 rounded-md mb-1">
@@ -357,7 +360,7 @@ export default function DashboardPage({ user, onLogout }) {
                               className={`px-4 py-2 rounded-xl text-xs font-semibold border transition cursor-pointer ${
                                 currentPick === option
                                   ? 'bg-[#10B981] text-slate-950 border-[#10B981] shadow-md shadow-[#10B981]/25'
-                                  : 'bg-[#1E293B]/80 text-slate-300 border-white/[0.08] hover:border-[#10B981]/60 hover:text-white'
+                                  : 'bg-[#1E293B]/80 text-slate-300 border-white/8 hover:border-[#10B981]/60 hover:text-white'
                               }`}
                             >
                               {option}
@@ -370,7 +373,6 @@ export default function DashboardPage({ user, onLogout }) {
                 </div>
               </div>
             ) : activeView === 'estadisticas' ? (
-              /* VISTA 4: ESTADÍSTICAS Y RENDIMIENTO */
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="glass-panel rounded-2xl p-6">
                   <h3 className="text-lg font-bold tracking-tight text-white mb-5">
@@ -387,9 +389,9 @@ export default function DashboardPage({ user, onLogout }) {
                               {pct}% efectividad
                             </span>
                           </div>
-                          <div className="w-full h-2 rounded-full bg-[#0F172A]/90 overflow-hidden border border-white/[0.05]">
+                          <div className="w-full h-2 rounded-full bg-[#0F172A]/90 overflow-hidden border border-white/5">
                             <div
-                              className="h-full bg-gradient-to-r from-[#059669] to-[#10B981] rounded-full shadow-[0_0_12px_rgba(16,185,129,0.45)]"
+                              className="h-full bg-linear-to-r from-[#059669] to-[#10B981] rounded-full shadow-[0_0_12px_rgba(16,185,129,0.45)]"
                               style={{ width: `${pct}%` }}
                             />
                           </div>
@@ -421,7 +423,7 @@ export default function DashboardPage({ user, onLogout }) {
                         className={`p-3.5 rounded-xl flex items-center justify-between border transition ${
                           row.highlight
                             ? 'bg-[#10B981]/12 border-[#10B981]/35 shadow-sm shadow-[#10B981]/10'
-                            : 'bg-[#0F172A]/70 border-white/[0.06]'
+                            : 'bg-[#0F172A]/70 border-white/6'
                         }`}
                       >
                         <div className="flex items-center gap-3">
@@ -446,7 +448,6 @@ export default function DashboardPage({ user, onLogout }) {
                 </div>
               </div>
             ) : (
-              /* VISTA 2 (POR DEFECTO): TABLA DE PREDICCIONES + FILTROS + PAGINACIÓN + CRUD */
               <MatchTable
                 matches={matches}
                 categories={
@@ -460,6 +461,7 @@ export default function DashboardPage({ user, onLogout }) {
                 setCurrentPage={setCurrentPage}
                 limit={limit}
                 setLimit={setLimit}
+                onSelectMatch={(item) => setSelectedMatch(item)}
                 onOpenAdd={() => {
                   setEditingItem(null);
                   setIsCrudModalOpen(true);
@@ -474,6 +476,15 @@ export default function DashboardPage({ user, onLogout }) {
           </main>
         </div>
       </div>
+
+      <MatchDetailModal
+        match={selectedMatch}
+        onClose={() => setSelectedMatch(null)}
+        onEdit={(item) => {
+          setEditingItem(item);
+          setIsCrudModalOpen(true);
+        }}
+      />
 
       <CrudModal
         isOpen={isCrudModalOpen}
