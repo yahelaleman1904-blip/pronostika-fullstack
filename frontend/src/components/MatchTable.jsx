@@ -1,5 +1,17 @@
 import { Search, Plus, Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 
+const formatFecha = (raw) => {
+  if (!raw || raw === 'Próximamente') return 'Próximamente';
+  const date = new Date(raw);
+  if (Number.isNaN(date.getTime())) return raw;
+  return new Intl.DateTimeFormat('es-MX', {
+    day: '2-digit',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date);
+};
+
 export default function MatchTable({
   matches,
   categories,
@@ -30,29 +42,51 @@ export default function MatchTable({
   const paginatedMatches = filteredMatches.slice(startIndex, startIndex + limit);
 
   const badgeStyle = (estado) => {
-    switch (estado) {
-      case 'Acertada':
-        return 'bg-[#10B981]/15 text-[#10B981] border-[#10B981]/30';
-      case 'En vivo':
-        return 'bg-amber-500/15 text-amber-400 border-amber-500/30 animate-pulse';
-      case 'Fallada':
-        return 'bg-red-500/15 text-red-400 border-red-500/30';
-      default:
-        return 'bg-slate-700/50 text-slate-300 border-slate-600';
+    const normalized = (estado || '').toUpperCase();
+    if (normalized === 'ACERTADA') {
+      return {
+        pill: 'bg-[#10B981]/15 text-[#10B981] border-[#10B981]/30',
+        dot: 'bg-[#10B981]',
+        label: 'Acertada',
+      };
     }
+    if (normalized === 'EN VIVO' || normalized === 'EN_VIVO') {
+      return {
+        pill: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
+        dot: 'bg-amber-400 animate-pulse',
+        label: 'En vivo',
+      };
+    }
+    if (normalized === 'FALLADA') {
+      return {
+        pill: 'bg-red-500/15 text-red-400 border-red-500/30',
+        dot: 'bg-red-400',
+        label: 'Fallada',
+      };
+    }
+    return {
+      pill: 'bg-slate-700/40 text-slate-300 border-white/10',
+      dot: 'bg-slate-400',
+      label: 'Pendiente',
+    };
   };
 
   return (
-    <div className="rounded-2xl bg-[#1E293B] border border-[#334155] overflow-hidden">
-      <div className="p-6 border-b border-[#334155] flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+    <div className="glass-panel rounded-2xl overflow-hidden">
+      <div className="p-6 border-b border-white/8 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h2 className="text-lg font-bold text-white">Pronósticos de partidos</h2>
-            <span className="px-2 py-0.5 rounded-md bg-red-500/15 border border-red-500/30 text-red-400 text-[10px] font-bold uppercase tracking-wider">
-              ESPN Live API
+          <div className="flex items-center gap-2.5">
+            <h2 className="text-lg font-bold tracking-tight text-white">
+              Pronósticos de partidos
+            </h2>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#10B981]/12 border border-[#10B981]/30 text-[#10B981] text-[10px] font-bold uppercase tracking-wider">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" />
+              En vivo
             </span>
           </div>
-          <p className="text-xs text-[#94A3B8]">{totalRecords} partidos reales encontrados</p>
+          <p className="text-xs text-[#94A3B8] mt-1 tabular-nums">
+            {totalRecords} pronósticos activos en base de datos
+          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
@@ -66,7 +100,7 @@ export default function MatchTable({
                 setCurrentPage(1);
               }}
               placeholder="Buscar club o partido..."
-              className="pl-9 pr-4 py-2 rounded-xl bg-[#0F172A] border border-[#334155] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#10B981]"
+              className="pl-9 pr-4 py-2 rounded-xl bg-[#0F172A]/80 border border-white/10 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#10B981] transition"
             />
           </div>
 
@@ -76,7 +110,7 @@ export default function MatchTable({
               setSelectedCategory(e.target.value);
               setCurrentPage(1);
             }}
-            className="px-3.5 py-2 rounded-xl bg-[#0F172A] border border-[#334155] text-sm text-white focus:outline-none focus:border-[#10B981]"
+            className="px-3.5 py-2 rounded-xl bg-[#0F172A]/80 border border-white/10 text-sm text-white focus:outline-none focus:border-[#10B981] transition"
           >
             <option value="Todas">Todas las ligas</option>
             {categories.map((cat) => (
@@ -88,7 +122,7 @@ export default function MatchTable({
 
           <button
             onClick={onOpenAdd}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#10B981] hover:bg-[#059669] text-slate-950 font-bold text-sm transition cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#10B981] hover:bg-[#059669] text-slate-950 font-bold text-sm transition shadow-lg shadow-[#10B981]/20 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Nuevo Pronóstico</span>
@@ -99,97 +133,111 @@ export default function MatchTable({
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="border-b border-[#334155] text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8] bg-[#0F172A]/40">
-              <th className="py-3.5 px-6">Partido (ESPN Oficial)</th>
+            <tr className="border-b border-white/8 text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8] bg-[#0F172A]/50">
+              <th className="py-3.5 px-6">Partido</th>
               <th className="py-3.5 px-4">Liga</th>
               <th className="py-3.5 px-4">Fecha / Hora</th>
               <th className="py-3.5 px-4">Ganador Previsto</th>
               <th className="py-3.5 px-4">Probabilidad</th>
               <th className="py-3.5 px-4">Estado</th>
-              <th className="py-3.5 px-6 text-right">Acciones CRUD</th>
+              <th className="py-3.5 px-6 text-right">Acciones</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#334155]/60 text-sm">
+          <tbody className="divide-y divide-white/6 text-sm">
             {paginatedMatches.length === 0 ? (
               <tr>
-                <td colSpan="7" className="py-12 text-center text-[#94A3B8]">
+                <td colSpan="7" className="py-14 text-center text-[#94A3B8]">
                   No se encontraron partidos que coincidan con los filtros.
                 </td>
               </tr>
             ) : (
-              paginatedMatches.map((item) => (
-                <tr key={item.id} className="hover:bg-[#0F172A]/40 transition">
-                  <td className="py-4 px-6 font-semibold text-white">
-                    <div className="flex items-center gap-3">
-                      {item.localLogo && (
-                        <img
-                          src={item.localLogo}
-                          alt={item.localName}
-                          className="w-6 h-6 object-contain"
-                        />
-                      )}
-                      <span>{item.title}</span>
-                      {item.awayLogo && (
-                        <img
-                          src={item.awayLogo}
-                          alt={item.awayName}
-                          className="w-6 h-6 object-contain"
-                        />
-                      )}
-                    </div>
-                  </td>
-                  <td className="py-4 px-4 text-[#94A3B8]">{item.category}</td>
-                  <td className="py-4 px-4 text-[#94A3B8]">{item.fecha}</td>
-                  <td className="py-4 px-4 font-medium text-slate-200">{item.ganadorPrevisto}</td>
-                  <td className="py-4 px-4">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-20 h-2 rounded-full bg-[#0F172A] overflow-hidden">
-                        <div
-                          className={`h-full rounded-full ${
-                            item.probabilidad >= 60 ? 'bg-[#10B981]' : 'bg-amber-400'
-                          }`}
-                          style={{ width: `${item.probabilidad}%` }}
-                        />
+              paginatedMatches.map((item) => {
+                const badge = badgeStyle(item.estado);
+                return (
+                  <tr key={item.id} className="hover:bg-white/4 transition-colors">
+                    <td className="py-4 px-6 font-semibold text-white">
+                      <div className="flex items-center gap-3">
+                        {item.localLogo && (
+                          <img
+                            src={item.localLogo}
+                            alt={item.localName}
+                            className="w-6 h-6 object-contain"
+                          />
+                        )}
+                        <span>{item.title}</span>
+                        {item.awayLogo && (
+                          <img
+                            src={item.awayLogo}
+                            alt={item.awayName}
+                            className="w-6 h-6 object-contain"
+                          />
+                        )}
                       </div>
-                      <span className="text-xs font-bold text-white">{item.probabilidad}%</span>
-                    </div>
-                  </td>
-                  <td className="py-4 px-4">
-                    <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${badgeStyle(
-                        item.estado
-                      )}`}
-                    >
-                      {item.estado}
-                    </span>
-                  </td>
-                  <td className="py-4 px-6 text-right">
-                    <div className="inline-flex items-center gap-2">
-                      <button
-                        onClick={() => onOpenEdit(item)}
-                        title="Editar pronóstico"
-                        className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition cursor-pointer"
+                    </td>
+                    <td className="py-4 px-4">
+                      <span className="px-2.5 py-1 rounded-lg bg-[#0F172A]/70 border border-white/8 text-xs font-medium text-slate-300">
+                        {item.category}
+                      </span>
+                    </td>
+                    <td className="py-4 px-4 text-[#94A3B8] text-xs tabular-nums">
+                      {formatFecha(item.fecha)}
+                    </td>
+                    <td className="py-4 px-4 font-semibold text-slate-100">
+                      {item.ganadorPrevisto}
+                    </td>
+                    <td className="py-4 px-4">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-20 h-2 rounded-full bg-[#0F172A] overflow-hidden border border-white/6">
+                          <div
+                            className={`h-full rounded-full ${
+                              item.probabilidad >= 60
+                                ? 'bg-linear-to-r from-[#059669] to-[#10B981]'
+                                : 'bg-amber-400'
+                            }`}
+                            style={{ width: `${item.probabilidad}%` }}
+                          />
+                        </div>
+                        <span className="text-xs font-bold text-white tabular-nums">
+                          {item.probabilidad}%
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-4 px-4">
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${badge.pill}`}
                       >
-                        <Pencil className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => onOpenDelete(item)}
-                        title="Eliminar pronóstico"
-                        className="p-1.5 rounded-lg bg-red-500/15 hover:bg-red-500/30 text-red-400 transition cursor-pointer"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
+                        <span className={`w-1.5 h-1.5 rounded-full ${badge.dot}`} />
+                        {badge.label}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6 text-right">
+                      <div className="inline-flex items-center gap-2">
+                        <button
+                          onClick={() => onOpenEdit(item)}
+                          title="Editar pronóstico"
+                          className="p-2 rounded-lg bg-white/5 hover:bg-white/12 border border-white/8 text-slate-200 transition cursor-pointer"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => onOpenDelete(item)}
+                          title="Eliminar pronóstico"
+                          className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 transition cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
       </div>
 
-      <div className="p-5 border-t border-[#334155] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#94A3B8]">
-        <div className="flex items-center gap-3">
+      <div className="p-5 border-t border-white/8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#94A3B8] bg-[#0F172A]/35">
+        <div className="flex items-center gap-3 tabular-nums">
           <span>Filas por página:</span>
           <select
             value={limit}
@@ -197,7 +245,7 @@ export default function MatchTable({
               setLimit(Number(e.target.value));
               setCurrentPage(1);
             }}
-            className="px-2.5 py-1.5 rounded-lg bg-[#0F172A] border border-[#334155] text-white font-semibold focus:outline-none focus:border-[#10B981]"
+            className="px-2.5 py-1.5 rounded-lg bg-[#0F172A] border border-white/10 text-white font-semibold focus:outline-none focus:border-[#10B981]"
           >
             <option value={10}>10</option>
             <option value={20}>20</option>
@@ -205,16 +253,16 @@ export default function MatchTable({
             <option value={50}>50</option>
           </select>
           <span>
-            Mostrando {totalRecords === 0 ? 0 : startIndex + 1}-
+            Mostrando {totalRecords === 0 ? 0 : startIndex + 1}–
             {Math.min(startIndex + limit, totalRecords)} de {totalRecords}
           </span>
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 tabular-nums">
           <button
             onClick={() => setCurrentPage(Math.max(1, safePage - 1))}
             disabled={safePage === 1}
-            className="p-1.5 rounded-lg bg-[#0F172A] border border-[#334155] text-slate-300 hover:text-white disabled:opacity-40 cursor-pointer"
+            className="p-1.5 rounded-lg bg-[#0F172A] border border-white/10 text-slate-300 hover:text-white hover:border-white/20 disabled:opacity-40 transition cursor-pointer"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -227,8 +275,8 @@ export default function MatchTable({
                 onClick={() => setCurrentPage(pageNum)}
                 className={`w-8 h-8 rounded-lg font-bold transition cursor-pointer ${
                   pageNum === safePage
-                    ? 'bg-[#10B981] text-slate-950'
-                    : 'bg-[#0F172A] border border-[#334155] text-slate-300 hover:bg-slate-800'
+                    ? 'bg-[#10B981] text-slate-950 shadow-md shadow-[#10B981]/25'
+                    : 'bg-[#0F172A] border border-white/10 text-slate-300 hover:bg-white/8'
                 }`}
               >
                 {pageNum}
@@ -238,7 +286,7 @@ export default function MatchTable({
           <button
             onClick={() => setCurrentPage(Math.min(totalPages, safePage + 1))}
             disabled={safePage === totalPages}
-            className="p-1.5 rounded-lg bg-[#0F172A] border border-[#334155] text-slate-300 hover:text-white disabled:opacity-40 cursor-pointer"
+            className="p-1.5 rounded-lg bg-[#0F172A] border border-white/10 text-slate-300 hover:text-white hover:border-white/20 disabled:opacity-40 transition cursor-pointer"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
