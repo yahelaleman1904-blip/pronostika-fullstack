@@ -12,7 +12,7 @@ import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import MatchTable from '../components/MatchTable';
 import MatchCardsGrid from '../components/MatchCardsGrid';
-import MatchDetailModal from '../components/MatchDetailModal';
+import MatchDetailPage from './MatchDetailPage';
 import CrudModal from '../components/CrudModal';
 import ConfirmModal from '../components/ConfirmModal';
 import ProfilePage from './ProfilePage';
@@ -155,6 +155,20 @@ export default function DashboardPage({ user, onLogout }) {
   const tasaAcierto = matches.length
     ? Math.round((acertadasCount / matches.length) * 100)
     : 68;
+
+    if (selectedMatch) {
+    return (
+      <MatchDetailPage
+        match={selectedMatch}
+        onBack={() => setSelectedMatch(null)}
+        onEdit={(item) => {
+          setSelectedMatch(null);
+          setEditingItem(item);
+          setIsCrudModalOpen(true);
+        }}
+      />
+    );
+  }
 
   return (
     <div className="relative min-h-screen flex bg-[#0F172A] text-[#F8FAFC] overflow-x-clip">
@@ -476,15 +490,6 @@ export default function DashboardPage({ user, onLogout }) {
           </main>
         </div>
       </div>
-
-      <MatchDetailModal
-        match={selectedMatch}
-        onClose={() => setSelectedMatch(null)}
-        onEdit={(item) => {
-          setEditingItem(item);
-          setIsCrudModalOpen(true);
-        }}
-      />
 
       <CrudModal
         isOpen={isCrudModalOpen}
