@@ -1,4 +1,3 @@
-import GoalAnimationCanvas from '../components/GoalAnimationCanvas';
 import { useState } from 'react';
 import {
   Trophy,
@@ -12,23 +11,34 @@ import {
   CheckCircle2,
   AlertCircle,
   ShieldCheck,
+  Check,
 } from 'lucide-react';
 import { authApi } from '../services/api';
+import GoalAnimationCanvas from '../components/GoalAnimationCanvas';
 
 const STRONG_PASSWORD_REGEX =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#._-]).{8,}$/;
 
 const COUNTRY_CODES = [
-  { code: '+52', flag: '🇲🇽', label: 'MX (+52)' },
-  { code: '+1', flag: '🇺🇸', label: 'US/CA (+1)' },
-  { code: '+34', flag: '🇪🇸', label: 'ES (+34)' },
-  { code: '+57', flag: '🇨🇴', label: 'CO (+57)' },
-  { code: '+54', flag: '🇦🇷', label: 'AR (+54)' },
-  { code: '+56', flag: '🇨🇱', label: 'CL (+56)' },
-  { code: '+51', flag: '🇵🇪', label: 'PE (+51)' },
-  { code: '+593', flag: '🇪🇨', label: 'EC (+593)' },
-  { code: '+502', flag: '🇬🇹', label: 'GT (+502)' },
-  { code: '+58', flag: '🇻🇪', label: 'VE (+58)' },
+  { code: '+52', label: 'MX (+52)' },
+  { code: '+1', label: 'US/CA (+1)' },
+  { code: '+34', label: 'ES (+34)' },
+  { code: '+57', label: 'CO (+57)' },
+  { code: '+54', label: 'AR (+54)' },
+  { code: '+56', label: 'CL (+56)' },
+  { code: '+51', label: 'PE (+51)' },
+  { code: '+593', label: 'EC (+593)' },
+  { code: '+502', label: 'GT (+502)' },
+  { code: '+58', label: 'VE (+58)' },
+];
+
+const STRENGTH_LEVELS = [
+  null,
+  { label: 'Te van a hackear', barColor: 'bg-red-500', textColor: 'text-red-400' },
+  { label: 'Va mejorando', barColor: 'bg-orange-500', textColor: 'text-orange-400' },
+  { label: 'Es buena', barColor: 'bg-amber-400', textColor: 'text-amber-300' },
+  { label: 'Esta sí está mejor', barColor: 'bg-lime-400', textColor: 'text-lime-300' },
+  { label: 'Invulnerable', barColor: 'bg-[#10B981]', textColor: 'text-[#10B981]' },
 ];
 
 export default function LoginPage({ onLogin, onLoginSuccess }) {
@@ -41,7 +51,9 @@ export default function LoginPage({ onLogin, onLoginSuccess }) {
   const [telefono, setTelefono] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Estados de UI
   const [loading, setLoading] = useState(false);
@@ -58,6 +70,27 @@ export default function LoginPage({ onLogin, onLoginSuccess }) {
   const [recoveryError, setRecoveryError] = useState('');
   const [recoveryLoading, setRecoveryLoading] = useState(false);
 
+  // Validaciones en tiempo real de contraseña
+  const passwordChecks = [
+    { key: 'length', label: 'Mínimo 8 elementos', valid: password.length >= 8 },
+    { key: 'upper', label: 'Mayúsculas (A-Z)', valid: /[A-Z]/.test(password) },
+    { key: 'lower', label: 'Minúsculas (a-z)', valid: /[a-z]/.test(password) },
+    { key: 'number', label: 'Números (0-9)', valid: /\d/.test(password) },
+    {
+      key: 'special',
+      label: 'Caracteres especiales (@$!%*?&#._-)',
+      valid: /[@$!%*?&#._-]/.test(password),
+    },
+  ];
+
+  const strengthScore = passwordChecks.filter((item) => item.valid).length;
+  const currentStrength =
+    password.length === 0 ? null : STRENGTH_LEVELS[Math.max(1, strengthScore)];
+  const passwordsMatch =
+    confirmPassword.length > 0 && password === confirmPassword;
+  const passwordsMismatch =
+    confirmPassword.length > 0 && password !== confirmPassword;
+
   const notifyAuthSuccess = (data) => {
     const callback = onLoginSuccess || onLogin;
     if (callback) callback(data);
@@ -68,11 +101,17 @@ export default function LoginPage({ onLogin, onLoginSuccess }) {
     setErrorMsg('');
     setSuccessMsg('');
 
-    if (isRegister && !STRONG_PASSWORD_REGEX.test(password)) {
-      setErrorMsg(
-        'La contraseña debe tener mínimo 8 caracteres, mayúscula, minúscula, número y símbolo (@$!%*?&#._-).'
-      );
-      return;
+    if (isRegister) {
+      if (!STRONG_PASSWORD_REGEX.test(password)) {
+        setErrorMsg(
+          'Tu contraseña debe cumplir todos los requisitos obligatorios.'
+        );
+        return;
+      }
+      if (password !== confirmPassword) {
+        setErrorMsg('Las contraseñas no coinciden. Verifica e intenta de nuevo.');
+        return;
+      }
     }
 
     setLoading(true);
@@ -147,21 +186,21 @@ export default function LoginPage({ onLogin, onLoginSuccess }) {
 
   return (
     <div className="min-h-screen flex bg-[#0F172A] text-[#F8FAFC]">
-{/* Panel izquierdo decorativo con estadio + animación de gol en la escuadra */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-[#0B1120] border-r border-white/8 p-12 flex-col justify-between">
-        {/* Imagen de estadio de fondo */}
+      {/* Panel izquierdo decorativo con estadio + escuadra 3D + difuminación */}
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-[#0F172A] p-12 flex-col justify-between">
         <img
           src="https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&w=1600&q=80"
           alt="Estadio de fútbol iluminado"
           className="absolute inset-0 w-full h-full object-cover opacity-35 scale-105"
         />
 
-        {/* Gradientes oscuros para mantener contraste */}
         <div className="absolute inset-0 bg-linear-to-t from-[#0F172A] via-[#0F172A]/70 to-[#0B1120]/60 pointer-events-none" />
         <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-[#10B981]/15 blur-[120px] pointer-events-none" />
 
-        {/* Animación Canvas: disparo con comba a la escuadra + red ondeando en loop */}
         <GoalAnimationCanvas />
+
+        {/* Difuminación suave hacia el panel derecho */}
+        <div className="absolute inset-y-0 right-0 w-44 bg-linear-to-r from-transparent via-[#0F172A]/75 to-[#0F172A] pointer-events-none z-5" />
 
         <div className="relative z-10 flex items-center gap-3">
           <div className="w-11 h-11 rounded-2xl bg-[#10B981]/15 border border-[#10B981]/40 flex items-center justify-center text-[#10B981] shadow-lg shadow-[#10B981]/15 backdrop-blur-md">
@@ -221,6 +260,7 @@ export default function LoginPage({ onLogin, onLoginSuccess }) {
                 onClick={() => {
                   setIsRegister(false);
                   setErrorMsg('');
+                  setConfirmPassword('');
                 }}
                 className={`py-2 rounded-lg text-xs font-bold transition cursor-pointer ${
                   !isRegister
@@ -296,7 +336,7 @@ export default function LoginPage({ onLogin, onLoginSuccess }) {
                     </div>
                   </div>
 
-                  {/* Selector de lada con banderas + Teléfono */}
+                  {/* Selector de lada limpio + Teléfono */}
                   <div>
                     <label className="block text-xs font-medium text-[#94A3B8] mb-1.5">
                       Teléfono (WhatsApp)
@@ -306,7 +346,7 @@ export default function LoginPage({ onLogin, onLoginSuccess }) {
                         value={countryCode}
                         onChange={(e) => setCountryCode(e.target.value)}
                         aria-label="Código de país"
-                        className="bg-[#1E293B] text-white text-xs font-semibold px-2.5 py-2.5 border-r border-[#334155] focus:outline-none cursor-pointer"
+                        className="bg-[#1E293B] text-white text-xs font-semibold px-3 py-2.5 border-r border-[#334155] focus:outline-none cursor-pointer"
                       >
                         {COUNTRY_CODES.map((c) => (
                           <option
@@ -314,7 +354,7 @@ export default function LoginPage({ onLogin, onLoginSuccess }) {
                             value={c.code}
                             className="bg-[#0F172A] text-white"
                           >
-                            {c.flag} {c.label}
+                            {c.label}
                           </option>
                         ))}
                       </select>
@@ -387,7 +427,112 @@ export default function LoginPage({ onLogin, onLoginSuccess }) {
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
+
+                {/* Medidor de seguridad + Checklist (solo en Crear cuenta) */}
+                {isRegister && (
+                  <div className="mt-3 p-3.5 rounded-xl bg-[#0F172A]/85 border border-white/8 space-y-3">
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="text-[#94A3B8] font-medium">
+                          Seguridad de la contraseña
+                        </span>
+                        <span
+                          className={`font-bold ${
+                            currentStrength ? currentStrength.textColor : 'text-slate-500'
+                          }`}
+                        >
+                          {currentStrength ? currentStrength.label : 'Sin contraseña'}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-5 gap-1.5">
+                        {[1, 2, 3, 4, 5].map((level) => {
+                          const active = password.length > 0 && level <= Math.max(1, strengthScore);
+                          return (
+                            <div
+                              key={level}
+                              className={`h-1.5 rounded-full transition-all duration-300 ${
+                                active && currentStrength
+                                  ? currentStrength.barColor
+                                  : 'bg-slate-800'
+                              }`}
+                            />
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-[11px]">
+                      {passwordChecks.map((req) => (
+                        <li
+                          key={req.key}
+                          className={`flex items-center gap-1.5 transition-colors ${
+                            req.valid ? 'text-[#10B981]' : 'text-slate-400'
+                          }`}
+                        >
+                          <span
+                            className={`w-4 h-4 rounded-full flex items-center justify-center border shrink-0 ${
+                              req.valid
+                                ? 'bg-[#10B981]/15 border-[#10B981]/40 text-[#10B981]'
+                                : 'border-slate-700 text-slate-600'
+                            }`}
+                          >
+                            <Check className="w-2.5 h-2.5" />
+                          </span>
+                          <span>{req.label}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
+
+              {/* Confirmar contraseña (solo en Crear cuenta) */}
+              {isRegister && (
+                <div>
+                  <label className="block text-xs font-medium text-[#94A3B8] mb-1.5">
+                    Repetir contraseña
+                  </label>
+                  <div className="relative">
+                    <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      required
+                      placeholder="Repite tu contraseña"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className={`w-full pl-10 pr-10 py-2.5 rounded-xl bg-[#0F172A] border text-white text-sm placeholder-slate-500 focus:outline-none transition ${
+                        passwordsMismatch
+                          ? 'border-red-500/70 focus:border-red-500'
+                          : passwordsMatch
+                          ? 'border-[#10B981]/70 focus:border-[#10B981]'
+                          : 'border-[#334155] focus:border-[#10B981]'
+                      }`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer"
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
+                    </button>
+                  </div>
+                  {passwordsMismatch && (
+                    <p className="text-[11px] text-red-400 mt-1.5">
+                      Las contraseñas no coinciden.
+                    </p>
+                  )}
+                  {passwordsMatch && (
+                    <p className="text-[11px] text-[#10B981] mt-1.5 flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      Las contraseñas coinciden.
+                    </p>
+                  )}
+                </div>
+              )}
 
               <button
                 type="submit"
