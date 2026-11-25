@@ -180,3 +180,21 @@ export const updateMatchApi = async (id, formData) => {
 export const deleteMatchApi = async (id) => {
   return pronosticosApi.eliminar(id);
 };
+
+export const fetchRealMatchDetails = async (local, visitante, liga) => {
+  const { data } = await http.get('/sports/match-details', {
+    params: { local, visitante, liga },
+  });
+  return data;
+};
+
+export const fetchAiMatchAnalysis = async ({ local, visitante, liga, homeRecent, awayRecent }) => {
+  const { data } = await http.post('/sports/ai-analysis', {
+    local,
+    visitante,
+    liga,
+    homeRecent,
+    awayRecent,
+  });
+  return data;
+};
