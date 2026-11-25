@@ -173,7 +173,7 @@ public class SportsIntelligenceController {
                     "contents", List.of(Map.of("parts", List.of(Map.of("text", prompt))))
             );
 
-            String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + geminiApiKey;
+            String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + geminiApiKey.trim();
             HttpRequest req = HttpRequest.newBuilder()
                     .uri(URI.create(url))
                     .header("Content-Type", "application/json")
@@ -182,8 +182,14 @@ public class SportsIntelligenceController {
 
             HttpResponse<String> res = http.send(req, HttpResponse.BodyHandlers.ofString());
             JsonNode root = mapper.readTree(res.body());
-            String analysis = root.path("candidates").path(0).path("content").path("parts").path(0).path("text").asText("");
 
+            if (res.statusCode() != 200) {
+                String googleError = root.path("error").path("message").asText(res.body());
+                return ResponseEntity.status(res.statusCode())
+                        .body(Map.of("error", "Gemini (" + res.statusCode() + "): " + googleError));
+            }
+
+            String analysis = root.path("candidates").path(0).path("content").path("parts").path(0).path("text").asText("");
             return ResponseEntity.ok(Map.of("analysis", analysis));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(Map.of("error", "Error generando análisis IA: " + e.getMessage()));
