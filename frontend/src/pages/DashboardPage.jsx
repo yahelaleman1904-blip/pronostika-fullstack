@@ -157,7 +157,7 @@ export default function DashboardPage({ user, onLogout }) {
     : 68;
 
   return (
-    <div className="relative min-h-screen flex bg-[#0F172A] text-[#F8FAFC] overflow-x-hidden">
+    <div className="relative min-h-screen flex bg-[#0F172A] text-[#F8FAFC] overflow-x-clip">
       {/* Fondo ambiental sutil con movimiento lento */}
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
         <div className="absolute inset-0 bg-subtle-grid opacity-90" />

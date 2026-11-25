@@ -73,6 +73,39 @@ export const authApi = {
       throw new Error(getErrorMessage(error, 'Error al solicitar recuperación.'));
     }
   },
+
+  async restablecerPassword(email, codigo, nuevaPassword) {
+    try {
+      const { data } = await http.post('/auth/restablecer-password', {
+        email,
+        codigo,
+        nuevaPassword,
+      });
+      return data;
+    } catch (error) {
+      throw new Error(getErrorMessage(error, 'No se pudo restablecer la contraseña.'));
+    }
+  },
+
+  async enviarCodigoEmail(email, nombre) {
+    try {
+      const { data } = await http.post('/auth/email/enviar-codigo', { email, nombre });
+      return data;
+    } catch (error) {
+      throw new Error(getErrorMessage(error, 'No se pudo enviar el código a tu correo.'));
+    }
+  },
+
+  async verificarCodigoEmail(email, codigo) {
+    try {
+      const { data } = await http.post('/auth/email/verificar-codigo', { email, codigo });
+      return data;
+    } catch (error) {
+      throw new Error(getErrorMessage(error, 'Código incorrecto o expirado.'));
+    }
+  },
+
+
 };
 
 export const pronosticosApi = {

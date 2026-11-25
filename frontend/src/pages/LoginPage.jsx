@@ -60,6 +60,12 @@ export default function LoginPage({ onLogin, onLoginSuccess }) {
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
+  // Modal de verificación de correo en registro (Anti-Bot)
+  const [verifyModalOpen, setVerifyModalOpen] = useState(false);
+  const [verifyCode, setVerifyCode] = useState('');
+  const [verifyError, setVerifyError] = useState('');
+  const [verifyLoading, setVerifyLoading] = useState(false);
+
   // Modal de recuperación de contraseña (2 pasos)
   const [forgotOpen, setForgotOpen] = useState(false);
   const [recoveryStep, setRecoveryStep] = useState(1);
@@ -117,17 +123,10 @@ export default function LoginPage({ onLogin, onLoginSuccess }) {
     setLoading(true);
     try {
       if (isRegister) {
-        const cleanPhone = telefono.replace(/\D/g, '');
-        const fullPhone = cleanPhone ? `${countryCode}${cleanPhone}` : '';
-
-        const data = await authApi.register({
-          nombre: nombre.trim(),
-          apellido: apellido.trim(),
-          email: email.trim(),
-          password,
-          telefono: fullPhone,
-        });
-        notifyAuthSuccess(data);
+        await authApi.enviarCodigoEmail(email.trim(), nombre.trim());
+        setVerifyCode('');
+        setVerifyError('');
+        setVerifyModalOpen(true);
       } else {
         const data = await authApi.login(email.trim(), password);
         notifyAuthSuccess(data);
@@ -136,6 +135,31 @@ export default function LoginPage({ onLogin, onLoginSuccess }) {
       setErrorMsg(error.message || 'Credenciales incorrectas o error de conexión.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleVerifyEmailAndRegister = async (e) => {
+    e.preventDefault();
+    setVerifyError('');
+    setVerifyLoading(true);
+    try {
+      await authApi.verificarCodigoEmail(email.trim(), verifyCode.trim());
+      const cleanPhone = telefono.replace(/\D/g, '');
+      const fullPhone = cleanPhone ? `${countryCode}${cleanPhone}` : '';
+
+      const data = await authApi.register({
+        nombre: nombre.trim(),
+        apellido: apellido.trim(),
+        email: email.trim(),
+        password,
+        telefono: fullPhone,
+      });
+      setVerifyModalOpen(false);
+      notifyAuthSuccess(data);
+    } catch (error) {
+      setVerifyError(error.message || 'Código inválido.');
+    } finally {
+      setVerifyLoading(false);
     }
   };
 
@@ -631,6 +655,56 @@ export default function LoginPage({ onLogin, onLoginSuccess }) {
                 </button>
               </form>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Verificación de Correo (Anti-Bot) */}
+      {verifyModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+          <div className="w-full max-w-sm rounded-2xl bg-[#1E293B] border border-[#334155] p-6 shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-display text-base font-bold text-white">
+                Verifica tu correo
+              </h3>
+              <button
+                type="button"
+                onClick={() => setVerifyModalOpen(false)}
+                className="text-slate-400 hover:text-white cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {verifyError && (
+              <div className="mb-3 p-2.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs">
+                {verifyError}
+              </div>
+            )}
+
+            <form onSubmit={handleVerifyEmailAndRegister} className="space-y-3">
+              <p className="text-xs text-[#94A3B8]">
+                Enviamos un código de 6 dígitos a{' '}
+                <strong className="text-white">{email.trim()}</strong>. Ingrésalo para confirmar
+                tu cuenta y continuar.
+              </p>
+              <input
+                type="text"
+                required
+                maxLength={6}
+                placeholder="000000"
+                value={verifyCode}
+                onChange={(e) => setVerifyCode(e.target.value.replace(/\D/g, ''))}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-[#0F172A] border border-[#334155] text-white text-base tracking-[0.35em] text-center font-bold focus:outline-none focus:border-[#10B981]"
+              />
+              <button
+                type="submit"
+                disabled={verifyLoading || verifyCode.length < 6}
+                className="w-full py-2.5 rounded-xl bg-[#10B981] hover:bg-[#059669] text-slate-950 font-bold text-sm cursor-pointer disabled:opacity-60"
+              >
+                {verifyLoading ? 'Verificando...' : 'Confirmar código y registrarme'}
+              </button>
+            </form>
           </div>
         </div>
       )}

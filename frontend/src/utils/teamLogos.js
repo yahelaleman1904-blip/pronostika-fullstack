@@ -1,15 +1,28 @@
+const normalizeText = (text = '') =>
+  text
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+
 const TEAM_LOGOS = {
   'real madrid': 'https://a.espncdn.com/i/teamlogos/soccer/500/86.png',
   'barcelona': 'https://a.espncdn.com/i/teamlogos/soccer/500/83.png',
   'fc barcelona': 'https://a.espncdn.com/i/teamlogos/soccer/500/83.png',
   'atletico madrid': 'https://a.espncdn.com/i/teamlogos/soccer/500/1068.png',
-  'atlético de madrid': 'https://a.espncdn.com/i/teamlogos/soccer/500/1068.png',
+  'atletico de madrid': 'https://a.espncdn.com/i/teamlogos/soccer/500/1068.png',
+  'villarreal': 'https://a.espncdn.com/i/teamlogos/soccer/500/102.png',
   'real betis': 'https://a.espncdn.com/i/teamlogos/soccer/500/244.png',
   'getafe': 'https://a.espncdn.com/i/teamlogos/soccer/500/2922.png',
   'sevilla': 'https://a.espncdn.com/i/teamlogos/soccer/500/243.png',
+  'valencia': 'https://a.espncdn.com/i/teamlogos/soccer/500/94.png',
+  'real sociedad': 'https://a.espncdn.com/i/teamlogos/soccer/500/89.png',
+  'athletic bilbao': 'https://a.espncdn.com/i/teamlogos/soccer/500/93.png',
   'manchester city': 'https://a.espncdn.com/i/teamlogos/soccer/500/382.png',
   'man city': 'https://a.espncdn.com/i/teamlogos/soccer/500/382.png',
   'manchester united': 'https://a.espncdn.com/i/teamlogos/soccer/500/360.png',
+  'man united': 'https://a.espncdn.com/i/teamlogos/soccer/500/360.png',
+  'man utd': 'https://a.espncdn.com/i/teamlogos/soccer/500/360.png',
   'arsenal': 'https://a.espncdn.com/i/teamlogos/soccer/500/359.png',
   'liverpool': 'https://a.espncdn.com/i/teamlogos/soccer/500/364.png',
   'chelsea': 'https://a.espncdn.com/i/teamlogos/soccer/500/363.png',
@@ -27,12 +40,12 @@ const TEAM_LOGOS = {
   'juventus': 'https://a.espncdn.com/i/teamlogos/soccer/500/111.png',
   'napoli': 'https://a.espncdn.com/i/teamlogos/soccer/500/114.png',
   'roma': 'https://a.espncdn.com/i/teamlogos/soccer/500/104.png',
+  'lazio': 'https://a.espncdn.com/i/teamlogos/soccer/500/112.png',
   'psg': 'https://a.espncdn.com/i/teamlogos/soccer/500/160.png',
   'paris saint-germain': 'https://a.espncdn.com/i/teamlogos/soccer/500/160.png',
   'psv': 'https://a.espncdn.com/i/teamlogos/soccer/500/148.png',
-  'américa': 'https://a.espncdn.com/i/teamlogos/soccer/500/227.png',
-  'club américa': 'https://a.espncdn.com/i/teamlogos/soccer/500/227.png',
   'america': 'https://a.espncdn.com/i/teamlogos/soccer/500/227.png',
+  'club america': 'https://a.espncdn.com/i/teamlogos/soccer/500/227.png',
   'chivas': 'https://a.espncdn.com/i/teamlogos/soccer/500/219.png',
   'guadalajara': 'https://a.espncdn.com/i/teamlogos/soccer/500/219.png',
   'cruz azul': 'https://a.espncdn.com/i/teamlogos/soccer/500/218.png',
@@ -53,14 +66,14 @@ const LEAGUE_LOGOS = {
 };
 
 export function getTeamLogo(teamName = '') {
-  const key = teamName.trim().toLowerCase();
+  const key = normalizeText(teamName);
   if (TEAM_LOGOS[key]) return TEAM_LOGOS[key];
   const partial = Object.keys(TEAM_LOGOS).find((k) => key.includes(k) || k.includes(key));
   return partial ? TEAM_LOGOS[partial] : null;
 }
 
 export function getLeagueLogo(leagueName = '') {
-  const key = leagueName.trim().toLowerCase();
+  const key = normalizeText(leagueName);
   if (LEAGUE_LOGOS[key]) return LEAGUE_LOGOS[key];
   const partial = Object.keys(LEAGUE_LOGOS).find((k) => key.includes(k));
   return partial ? LEAGUE_LOGOS[partial] : null;
