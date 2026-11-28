@@ -168,3 +168,70 @@
   border-color: rgba(16, 185, 129, 0.4);
   box-shadow: 0 16px 34px -16px rgba(16, 185, 129, 0.35);
 }
+
+/* ---------- Transiciones ---------- */
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.35s ease-out both;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out both;
+}
+
+/* Escalona la entrada de listas: style={{ animationDelay }} o estas clases */
+.stagger > * {
+  animation: fadeUp 0.35s ease-out both;
+}
+.stagger > *:nth-child(2) { animation-delay: 40ms; }
+.stagger > *:nth-child(3) { animation-delay: 80ms; }
+.stagger > *:nth-child(4) { animation-delay: 120ms; }
+.stagger > *:nth-child(5) { animation-delay: 160ms; }
+.stagger > *:nth-child(6) { animation-delay: 200ms; }
+.stagger > *:nth-child(n + 7) { animation-delay: 240ms; }
+
+/* Despliegue suave de tarjetas (grid-template-rows 0fr -> 1fr) */
+.collapse-grid {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s ease;
+}
+
+.collapse-grid[data-open='true'] {
+  grid-template-rows: 1fr;
+}
+
+.collapse-grid > * {
+  overflow: hidden;
+}
