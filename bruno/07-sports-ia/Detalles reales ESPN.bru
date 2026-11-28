@@ -1,0 +1,31 @@
+meta {
+  name: Detalles reales ESPN
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/sports/match-details?local=Arsenal&visitante=Chelsea&liga=Premier League
+  body: none
+  auth: bearer
+}
+
+params:query {
+  local: Arsenal
+  visitante: Chelsea
+  liga: Premier League
+}
+
+auth:bearer {
+  token: {{usuarioToken}}
+}
+
+tests {
+  test("responde 200", function () {
+    expect(res.status).to.equal(200);
+  });
+}
+
+docs {
+Consulta plantillas y últimos 5 resultados reales de ambos clubes desde la API pública de ESPN.
+}
