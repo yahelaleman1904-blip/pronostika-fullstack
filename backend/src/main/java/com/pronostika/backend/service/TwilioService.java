@@ -40,7 +40,7 @@ public class TwilioService {
         this.whatsappNumber = whatsappNumber;
     }
 
-    /**
+/**
      * Envía un SMS. Regresa true si Twilio aceptó el mensaje.
      */
     public boolean enviarSms(String destino, String mensaje) {
@@ -48,7 +48,7 @@ public class TwilioService {
             log.warn("Twilio sin configurar: no se envió el SMS a {}", ocultar(destino));
             return false;
         }
-        return enviar(normalizar(destino), phoneNumber, mensaje, "SMS");
+        return enviar(normalizarParaSms(destino), phoneNumber.trim(), mensaje, "SMS");
     }
 
     /**
@@ -60,7 +60,7 @@ public class TwilioService {
             log.warn("Twilio sin configurar: no se envió el WhatsApp a {}", ocultar(destino));
             return false;
         }
-        String para = conPrefijoWhatsapp(normalizar(destino));
+        String para = conPrefijoWhatsapp(normalizarParaWhatsapp(destino));
         String desde = conPrefijoWhatsapp(whatsappNumber.trim());
         return enviar(para, desde, mensaje, "WhatsApp");
     }
@@ -98,7 +98,40 @@ public class TwilioService {
     }
 
     private static String normalizar(String numero) {
-        return numero == null ? null : numero.replaceAll("[\\s()-]", "");
+        if (numero == null) {
+            return null;
+        }
+        String limpio = numero.trim();
+        if (limpio.startsWith(PREFIJO_WHATSAPP)) {
+            limpio = limpio.substring(PREFIJO_WHATSAPP.length());
+        }
+        limpio = limpio.replaceAll("[\\s()-]", "");
+        if (limpio.matches("^[0-9]{10}$")) {
+            return "+52" + limpio;
+        }
+        if (limpio.matches("^521[0-9]{10}$")) {
+            return "+" + limpio;
+        }
+        if (!limpio.startsWith("+") && limpio.matches("^[0-9]+$")) {
+            return "+" + limpio;
+        }
+        return limpio;
+    }
+
+    private static String normalizarParaSms(String numero) {
+        String base = normalizar(numero);
+        if (base != null && base.matches("^\\+521[0-9]{10}$")) {
+            return "+52" + base.substring(4);
+        }
+        return base;
+    }
+
+    private static String normalizarParaWhatsapp(String numero) {
+        String base = normalizar(numero);
+        if (base != null && base.matches("^\\+52[0-9]{10}$")) {
+            return "+521" + base.substring(3);
+        }
+        return base;
     }
 
     private static String conPrefijoWhatsapp(String numero) {
