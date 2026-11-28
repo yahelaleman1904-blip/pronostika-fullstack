@@ -83,6 +83,11 @@ export default function QuinielaHistory({ refreshKey = 0 }) {
         </span>
       </div>
 
+      <div className="px-3.5 py-2.5 rounded-xl bg-[#10B981]/8 border border-[#10B981]/20 text-xs text-slate-300">
+        Las boletas guardadas envían automáticamente el resumen de tus pronósticos al número de WhatsApp registrado en{' '}
+        <span className="text-[#10B981] font-semibold">Mi Perfil</span>.
+      </div>
+
       {loading ? (
         <p className="text-xs text-[#94A3B8] py-4">Cargando historial de quinielas...</p>
       ) : error ? (
