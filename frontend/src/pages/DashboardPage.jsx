@@ -24,6 +24,7 @@ import {
   createMatchApi,
   updateMatchApi,
   deleteMatchApi,
+  guardarQuinielaApi,
 } from '../services/api';
 
 export default function DashboardPage({ user, onLogout }) {
@@ -35,6 +36,7 @@ export default function DashboardPage({ user, onLogout }) {
 
   // Estado interactivo para la vista "Mi Quiniela"
   const [quinielaPicks, setQuinielaPicks] = useState({});
+  const [isSavingQuiniela, setIsSavingQuiniela] = useState(false);
 
   // Filtros
   const [searchTerm, setSearchTerm] = useState('');
@@ -149,6 +151,48 @@ export default function DashboardPage({ user, onLogout }) {
 
   const handlePickQuiniela = (matchId, selection) => {
     setQuinielaPicks((prev) => ({ ...prev, [matchId]: selection }));
+  };
+
+  const handleGuardarQuiniela = async () => {
+    const entradas = Object.entries(quinielaPicks);
+    if (entradas.length === 0) {
+      showToast('Selecciona al menos un partido antes de guardar.');
+      return;
+    }
+
+    // Evita partidoId repetido (regla que valida QuinielaService en backend)
+    const porPartido = new Map();
+    entradas.forEach(([matchId, seleccion]) => {
+      const match = matches.find((m) => String(m.id) === String(matchId));
+      if (match?.partidoId) {
+        porPartido.set(match.partidoId, seleccion.toUpperCase());
+      }
+    });
+
+    const selecciones = Array.from(porPartido.entries()).map(
+      ([partidoId, seleccion]) => ({ partidoId, seleccion })
+    );
+
+    if (selecciones.length === 0) {
+      showToast('No se encontraron partidos válidos para guardar.');
+      return;
+    }
+
+    setIsSavingQuiniela(true);
+    try {
+      const res = await guardarQuinielaApi('Jornada 12', selecciones);
+      const canal = res.whatsappEnviado
+        ? 'Confirmación enviada por WhatsApp.'
+        : res.smsEnviado
+        ? 'Confirmación enviada por SMS.'
+        : 'Quiniela guardada (revisa tu teléfono en Mi Perfil o Twilio).';
+      showToast(`Quiniela #${res.quiniela.id} registrada. ${canal}`);
+      setQuinielaPicks({});
+    } catch (err) {
+      showToast(err.message);
+    } finally {
+      setIsSavingQuiniela(false);
+    }
   };
 
   const acertadasCount = matches.filter(
@@ -338,14 +382,13 @@ return (
                     </p>
                   </div>
                   <button
-                    onClick={() =>
-                      showToast(
-                        `Quiniela guardada con ${Object.keys(quinielaPicks).length} pronósticos registrados.`
-                      )
-                    }
-                    className="px-5 py-2.5 rounded-xl bg-[#10B981] hover:bg-[#059669] text-slate-950 font-bold text-xs tracking-wide transition shadow-lg shadow-[#10B981]/20 cursor-pointer"
+                    onClick={handleGuardarQuiniela}
+                    disabled={isSavingQuiniela}
+                    className="px-5 py-2.5 rounded-xl bg-[#10B981] hover:bg-[#059669] disabled:opacity-60 text-slate-950 font-bold text-xs tracking-wide transition shadow-lg shadow-[#10B981]/20 cursor-pointer"
                   >
-                    Guardar mi Quiniela ({Object.keys(quinielaPicks).length}/10)
+                    {isSavingQuiniela
+                      ? 'Guardando y enviando...'
+                      : `Guardar mi Quiniela (${Object.keys(quinielaPicks).length}/10)`}
                   </button>
                 </div>
 
