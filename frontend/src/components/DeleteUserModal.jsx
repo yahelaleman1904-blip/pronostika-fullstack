@@ -5,8 +5,8 @@ export default function DeleteUserModal({ user, onCancel, onConfirm, isDeleting 
   if (!user) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xs p-4">
-      <div className="w-full max-w-sm rounded-2xl bg-[#1E293B] border border-[#334155] p-6 text-center shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xs p-4 animate-fade-in">
+      <div className="w-full max-w-sm rounded-2xl glass-card p-6 animate-scale-in text-center shadow-2xl">
         <div className="w-12 h-12 rounded-full bg-red-500/15 text-red-400 flex items-center justify-center mx-auto mb-4">
           <AlertTriangle className="w-6 h-6" />
         </div>
@@ -21,14 +21,14 @@ export default function DeleteUserModal({ user, onCancel, onConfirm, isDeleting 
         <div className="flex justify-center gap-3">
           <button
             onClick={onCancel}
-            className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium cursor-pointer"
+            className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium cursor-pointer btn-press"
           >
             Cancelar
           </button>
           <button
             onClick={onConfirm}
             disabled={isDeleting}
-            className="px-5 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-bold cursor-pointer disabled:opacity-50"
+            className="px-5 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-bold cursor-pointer btn-press disabled:opacity-50"
           >
             {isDeleting ? 'Eliminando...' : 'Sí, eliminar'}
           </button>

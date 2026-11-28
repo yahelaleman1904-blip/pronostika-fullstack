@@ -15,8 +15,8 @@ export default function ChangeRoleModal({ user, roles, onCancel, onConfirm, isSa
   const unchanged = selectedRole === user.rol;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xs p-4">
-      <div className="w-full max-w-md rounded-2xl bg-[#1E293B] border border-[#334155] p-6 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xs p-4 animate-fade-in">
+      <div className="w-full max-w-md rounded-2xl glass-card p-6 animate-scale-in shadow-2xl">
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-[#10B981]/15 text-[#10B981] flex items-center justify-center">
@@ -29,7 +29,7 @@ export default function ChangeRoleModal({ user, roles, onCancel, onConfirm, isSa
               </p>
             </div>
           </div>
-          <button onClick={onCancel} className="text-slate-400 hover:text-white cursor-pointer" aria-label="Cerrar">
+          <button onClick={onCancel} className="text-slate-400 hover:text-white cursor-pointer btn-press" aria-label="Cerrar">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -63,14 +63,14 @@ export default function ChangeRoleModal({ user, roles, onCancel, onConfirm, isSa
         <div className="flex justify-end gap-3 pt-5">
           <button
             onClick={onCancel}
-            className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium cursor-pointer"
+            className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium cursor-pointer btn-press"
           >
             Cancelar
           </button>
           <button
             onClick={() => onConfirm(selectedRole)}
             disabled={unchanged || isSaving}
-            className="px-5 py-2.5 rounded-xl bg-[#10B981] hover:bg-[#059669] text-slate-950 text-sm font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-5 py-2.5 rounded-xl bg-[#10B981] hover:bg-[#059669] text-slate-950 text-sm font-bold cursor-pointer btn-press disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSaving ? 'Guardando...' : 'Guardar rol'}
           </button>
