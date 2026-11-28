@@ -1,0 +1,35 @@
+meta {
+  name: Analisis tactico IA
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/sports/ai-analysis
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{usuarioToken}}
+}
+
+body:json {
+  {
+    "local": "Arsenal",
+    "visitante": "Chelsea",
+    "liga": "Premier League",
+    "homeRecent": ["W", "W", "D", "W", "L"],
+    "awayRecent": ["W", "D", "L", "W", "D"]
+  }
+}
+
+tests {
+  test("responde 200", function () {
+    expect(res.status).to.equal(200);
+  });
+}
+
+docs {
+Genera el análisis táctico previo al partido utilizando Gemini AI a partir de la racha reciente de ambos equipos.
+}
