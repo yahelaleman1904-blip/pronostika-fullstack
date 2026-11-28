@@ -1,0 +1,25 @@
+meta {
+  name: Eliminar pronostico
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{baseUrl}}/pronosticos/{{pronosticoId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+tests {
+  test("responde 204", function () {
+    expect(res.status).to.equal(204);
+  });
+}
+
+docs {
+Elimina un pronóstico por su id. Requiere rol ADMIN o ANALISTA.
+}
