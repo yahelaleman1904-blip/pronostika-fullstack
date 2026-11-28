@@ -74,7 +74,7 @@ export default function TopPlayersPage({ onOpenTeam }) {
             {sorted.slice(0, 3).map((p, i) => (
               <div
                 key={p.id}
-                className={`relative rounded-2xl border bg-linear-to-b to-transparent p-5 glass-card lift-hover ${PODIUM_STYLE[i]}`}
+                className={`relative rounded-2xl border bg-linear-to-b to-[#1E293B]/60 backdrop-blur-xl shadow-[0_10px_30px_-14px_rgba(0,0,0,0.6)] p-5 lift-hover ${PODIUM_STYLE[i]}`}
               >
                 <div className="flex items-center justify-between">
                   <span className="inline-flex items-center gap-1 text-xs font-bold">
