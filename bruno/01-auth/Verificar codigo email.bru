@@ -1,0 +1,28 @@
+meta {
+  name: Verificar codigo email
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/auth/email/verificar-codigo
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "{{usuarioEmail}}",
+    "codigo": "123456"
+  }
+}
+
+tests {
+  test("responde 200 o 400 segun validez del codigo", function () {
+    expect([200, 400]).to.include(res.status);
+  });
+}
+
+docs {
+Valida el código OTP de 6 dígitos recibido en el correo electrónico.
+}
