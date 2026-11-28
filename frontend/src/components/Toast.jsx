@@ -15,7 +15,7 @@ export default function Toast({ message, type = 'success', onClose, duration = 3
   const Icon = isError ? AlertCircle : CheckCircle2;
 
   return (
-    <div className="fixed bottom-6 right-6 z-[60] max-w-sm" role="status" aria-live="polite">
+    <div className="fixed bottom-6 right-6 z-[60] max-w-sm animate-fade-up" role="status" aria-live="polite">
       <div
         className={`flex items-start gap-3 rounded-xl border px-4 py-3 shadow-2xl bg-[#1E293B] ${
           isError ? 'border-red-500/40 text-red-300' : 'border-[#10B981]/40 text-[#10B981]'
