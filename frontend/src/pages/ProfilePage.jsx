@@ -120,8 +120,8 @@ export default function ProfilePage() {
     return (
       <div className="min-h-screen bg-[#0F172A] p-6 lg:p-8">
         <div className="max-w-4xl mx-auto grid gap-6 md:grid-cols-3">
-          <div className="h-72 rounded-2xl bg-[#1E293B] border border-[#334155] animate-pulse" />
-          <div className="md:col-span-2 h-72 rounded-2xl bg-[#1E293B] border border-[#334155] animate-pulse" />
+          <div className="h-72 rounded-2xl skeleton" />
+          <div className="md:col-span-2 h-72 rounded-2xl skeleton" />
         </div>
       </div>
     );
@@ -154,7 +154,7 @@ export default function ProfilePage() {
 
         <div className="grid gap-6 md:grid-cols-3">
           {/* Tarjeta de avatar */}
-          <div className="rounded-2xl bg-[#1E293B] border border-[#334155] p-6 flex flex-col items-center text-center">
+          <div className="rounded-2xl glass-card p-6 animate-fade-up flex flex-col items-center text-center">
             <img
               src={avatarFor(profile)}
               alt={`Avatar de ${profile.nombre}`}
@@ -189,13 +189,13 @@ export default function ProfilePage() {
           </div>
 
           {/* Datos y edición */}
-          <div className="md:col-span-2 rounded-2xl bg-[#1E293B] border border-[#334155] p-6">
+          <div className="md:col-span-2 rounded-2xl glass-card p-6 animate-fade-up">
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-base font-bold text-white">Información de la cuenta</h3>
               {!isEditing && (
                 <button
                   onClick={startEditing}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#10B981]/15 hover:bg-[#10B981]/25 border border-[#10B981]/30 text-[#10B981] text-xs font-semibold cursor-pointer"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#10B981]/15 hover:bg-[#10B981]/25 border border-[#10B981]/30 text-[#10B981] text-xs font-semibold cursor-pointer btn-press"
                 >
                   <Pencil className="w-3.5 h-3.5" />
                   Editar
@@ -268,7 +268,7 @@ export default function ProfilePage() {
                   <button
                     type="button"
                     onClick={() => setIsEditing(false)}
-                    className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium cursor-pointer"
+                    className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium cursor-pointer btn-press"
                   >
                     <X className="w-4 h-4" />
                     Cancelar
@@ -276,7 +276,7 @@ export default function ProfilePage() {
                   <button
                     type="submit"
                     disabled={isSaving}
-                    className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#10B981] hover:bg-[#059669] text-slate-950 text-sm font-bold cursor-pointer disabled:opacity-50"
+                    className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#10B981] hover:bg-[#059669] text-slate-950 text-sm font-bold cursor-pointer btn-press disabled:opacity-50"
                   >
                     <Save className="w-4 h-4" />
                     {isSaving ? 'Guardando...' : 'Guardar cambios'}

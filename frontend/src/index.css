@@ -90,3 +90,198 @@
     0 20px 40px -14px rgba(16, 185, 129, 0.22),
     inset 0 1px 0 rgba(255, 255, 255, 0.09);
 }
+/* ---------- Texturas de fondo ---------- */
+
+/* Grano muy ligero (ruido SVG) para que el fondo no se vea plano */
+.bg-grain {
+  position: relative;
+  isolation: isolate;
+}
+
+.bg-grain::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+}
+
+/* Malla oscura con degradados radiales suaves en verde y azul */
+.bg-mesh {
+  background-color: #0F172A;
+  background-image:
+    radial-gradient(60rem 30rem at 10% -10%, rgba(16, 185, 129, 0.12), transparent 60%),
+    radial-gradient(50rem 28rem at 110% 10%, rgba(56, 189, 248, 0.08), transparent 60%),
+    radial-gradient(40rem 24rem at 50% 120%, rgba(16, 185, 129, 0.07), transparent 60%);
+}
+
+/* ---------- Tarjetas de cristal ---------- */
+
+.glass-card {
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.72), rgba(30, 41, 59, 0.5));
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 10px 30px -14px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.glass-row {
+  transition: background-color 0.2s ease;
+}
+
+.glass-row:hover {
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+/* ---------- Micro-interacciones ---------- */
+
+/* Botones: elevación y brillo al pasar el mouse, se encogen al presionar */
+.btn-press {
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease, background-color 0.18s ease;
+}
+
+.btn-press:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+}
+
+.btn-press:active {
+  transform: scale(0.95);
+}
+
+.btn-press:disabled {
+  transform: none;
+  filter: none;
+}
+
+.lift-hover {
+  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+}
+
+.lift-hover:hover {
+  transform: translateY(-2px);
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 16px 34px -16px rgba(16, 185, 129, 0.35);
+}
+
+/* ---------- Transiciones ---------- */
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.35s ease-out both;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out both;
+}
+
+/* Escalona la entrada de listas: style={{ animationDelay }} o estas clases */
+.stagger > * {
+  animation: fadeUp 0.35s ease-out both;
+}
+.stagger > *:nth-child(2) { animation-delay: 40ms; }
+.stagger > *:nth-child(3) { animation-delay: 80ms; }
+.stagger > *:nth-child(4) { animation-delay: 120ms; }
+.stagger > *:nth-child(5) { animation-delay: 160ms; }
+.stagger > *:nth-child(6) { animation-delay: 200ms; }
+.stagger > *:nth-child(n + 7) { animation-delay: 240ms; }
+
+/* Despliegue suave de tarjetas (grid-template-rows 0fr -> 1fr) */
+.collapse-grid {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s ease;
+}
+
+.collapse-grid[data-open='true'] {
+  grid-template-rows: 1fr;
+}
+
+.collapse-grid > * {
+  overflow: hidden;
+}
+
+/* ---------- Skeleton loaders ---------- */
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: rgba(51, 65, 85, 0.45);
+  border-radius: 0.5rem;
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent);
+  animation: shimmer 1.4s infinite;
+}
+
+/* Punto pulsante para partidos en vivo */
+@keyframes livePulse {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); }
+  70% { box-shadow: 0 0 0 7px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+.live-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: #EF4444;
+  animation: livePulse 1.6s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up,
+  .animate-scale-in,
+  .animate-fade-in,
+  .stagger > *,
+  .skeleton::after,
+  .live-dot {
+    animation: none;
+  }
+}
