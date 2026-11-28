@@ -166,7 +166,7 @@ export default function TeamPage({ team, onBack, onOpenTeam, onOpenLeague }) {
       {/* Tarjeta principal */}
       <div className="relative glass-card rounded-3xl p-6 overflow-hidden animate-fade-up">
         <div className="pointer-events-none absolute -top-24 -right-24 w-72 h-72 rounded-full bg-[#10B981]/15 blur-3xl" />
-        <div className="relative flex flex-col lg:flex-row lg:items-center gap-6">
+        <div className="relative flex flex-col xl:flex-row xl:items-center gap-6">
           <div className="flex items-center gap-5 min-w-0">
             <div className="w-28 h-28 rounded-3xl bg-[#0F172A]/80 border border-white/10 flex items-center justify-center shadow-inner shrink-0">
               <TeamCrest name={team} size="xl" />
@@ -180,9 +180,9 @@ export default function TeamPage({ team, onBack, onOpenTeam, onOpenLeague }) {
                 {league.nombre} · {league.pais}
               </button>
               <div className="mt-3 flex items-center gap-3">
-                {row && <FormDots results={row.forma} size="md" />}
+                {recent.length > 0 && <FormDots results={recent.map((m) => m.result).reverse()} size="md" />}
                 <span
-                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[10px] font-semibold ${
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[10px] font-semibold whitespace-nowrap ${
                     source === 'backend'
                       ? 'bg-[#10B981]/10 border-[#10B981]/30 text-[#10B981]'
                       : 'bg-white/5 border-white/10 text-slate-400'
@@ -196,9 +196,9 @@ export default function TeamPage({ team, onBack, onOpenTeam, onOpenLeague }) {
           </div>
 
           {tiles.length > 0 && (
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 lg:ml-auto">
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 xl:ml-auto">
               {tiles.map((t) => (
-                <div key={t.label} className="rounded-xl bg-[#0F172A]/60 border border-white/8 px-3 py-2.5 text-center min-w-20">
+                <div key={t.label} className="rounded-xl bg-[#0F172A]/60 border border-white/8 px-3 py-2.5 text-center min-w-20 whitespace-nowrap">
                   <p className="text-[10px] uppercase tracking-wider text-slate-500">{t.label}</p>
                   <p
                     className={`font-display text-xl font-extrabold tabular-nums ${
