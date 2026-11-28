@@ -186,7 +186,7 @@ export default function AdminUsersPage() {
           </div>
           <button
             onClick={loadUsers}
-            className="p-2.5 rounded-xl bg-[#1E293B] border border-[#334155] text-[#94A3B8] hover:text-white cursor-pointer"
+            className="p-2.5 rounded-xl bg-[#1E293B] border border-[#334155] text-[#94A3B8] hover:text-white cursor-pointer btn-press"
             aria-label="Recargar"
           >
             <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
@@ -195,7 +195,7 @@ export default function AdminUsersPage() {
       </div>
 
       {/* Tabla */}
-      <div className="rounded-2xl bg-[#1E293B] border border-[#334155] overflow-hidden">
+      <div className="rounded-2xl glass-card overflow-hidden animate-fade-up">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -225,7 +225,7 @@ export default function AdminUsersPage() {
                 Array.from({ length: Math.min(size, 5) }).map((_, i) => (
                   <tr key={`sk-${i}`} className="border-b border-[#334155]/60">
                     <td colSpan={COLUMNS.length + 1} className="px-5 py-4">
-                      <div className="h-5 rounded-lg bg-[#334155]/50 animate-pulse" />
+                      <div className="skeleton h-5" />
                     </td>
                   </tr>
                 ))}
@@ -249,7 +249,7 @@ export default function AdminUsersPage() {
               {!isLoading &&
                 !errorMsg &&
                 users.map((u) => (
-                  <tr key={u.id} className="border-b border-[#334155]/60 hover:bg-[#0F172A]/40 transition">
+                  <tr key={u.id} className="border-b border-[#334155]/60 glass-row">
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
                         <img
@@ -283,14 +283,14 @@ export default function AdminUsersPage() {
                       <div className="flex justify-end gap-2">
                         <button
                           onClick={() => setUserForRole(u)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#10B981]/10 hover:bg-[#10B981]/20 border border-[#10B981]/30 text-[#10B981] text-xs font-semibold cursor-pointer"
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#10B981]/10 hover:bg-[#10B981]/20 border border-[#10B981]/30 text-[#10B981] text-xs font-semibold cursor-pointer btn-press"
                         >
                           <ShieldCheck className="w-3.5 h-3.5" />
                           Rol
                         </button>
                         <button
                           onClick={() => setUserToDelete(u)}
-                          className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 cursor-pointer"
+                          className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 cursor-pointer btn-press"
                           aria-label={`Eliminar a ${u.nombre}`}
                         >
                           <Trash2 className="w-4 h-4" />
@@ -330,7 +330,7 @@ export default function AdminUsersPage() {
             <button
               onClick={() => setPage((p) => Math.max(p - 1, 0))}
               disabled={page === 0 || isLoading}
-              className="p-2 rounded-lg bg-[#0F172A] border border-[#334155] text-slate-300 hover:text-white disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
+              className="p-2 rounded-lg bg-[#0F172A] border border-[#334155] text-slate-300 hover:text-white disabled:opacity-40 cursor-pointer btn-press disabled:cursor-not-allowed"
               aria-label="Página anterior"
             >
               <ChevronLeft className="w-4 h-4" />
@@ -341,7 +341,7 @@ export default function AdminUsersPage() {
             <button
               onClick={() => setPage((p) => p + 1)}
               disabled={page + 1 >= totalPages || isLoading}
-              className="p-2 rounded-lg bg-[#0F172A] border border-[#334155] text-slate-300 hover:text-white disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
+              className="p-2 rounded-lg bg-[#0F172A] border border-[#334155] text-slate-300 hover:text-white disabled:opacity-40 cursor-pointer btn-press disabled:cursor-not-allowed"
               aria-label="Página siguiente"
             >
               <ChevronRight className="w-4 h-4" />
