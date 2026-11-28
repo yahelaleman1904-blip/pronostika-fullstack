@@ -270,6 +270,7 @@ export function getTeamFixtures(team, now = new Date()) {
     const key = toDateKey(d);
     getFixtures(key, now)
       .filter((f) => f.local === team || f.visitante === team)
+      .slice(0, 1) // un solo partido por día aunque juegue liga y copa
       .forEach((f) => {
         if (f.estado === 'finalizado') recent.push(f);
         else upcoming.push(f);
