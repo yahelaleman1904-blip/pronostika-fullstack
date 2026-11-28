@@ -17,6 +17,8 @@ import CrudModal from '../components/CrudModal';
 import ConfirmModal from '../components/ConfirmModal';
 import ProfilePage from './ProfilePage';
 import AdminUsersPage from './AdminUsersPage';
+import FootballHub from './FootballHub';
+import { isFootballView, footballSection } from '../navigation/footballViews';
 import {
   fetchMatches,
   createMatchApi,
@@ -461,6 +463,8 @@ return (
                   </div>
                 </div>
               </div>
+            ) : isFootballView(activeView) ? (
+              <FootballHub key={activeView} section={footballSection(activeView)} />
             ) : (
               <MatchTable
                 matches={matches}
