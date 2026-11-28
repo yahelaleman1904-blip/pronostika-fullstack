@@ -1,0 +1,16 @@
+[Unit]
+Description=Pronostika Spring Boot Backend API
+After=network.target mysql.service
+
+[Service]
+Type=simple
+User=yahel
+WorkingDirectory=/home/yahel/pronostika
+ExecStart=/usr/bin/java -jar /home/yahel/pronostika/pronostika-backend.jar --spring.config.additional-location=file:/home/yahel/pronostika/application-prod.properties
+Restart=on-failure
+RestartSec=5
+StandardOutput=append:/home/yahel/pronostika/pronostika.log
+StandardError=append:/home/yahel/pronostika/pronostika.log
+
+[Install]
+WantedBy=multi-user.target
