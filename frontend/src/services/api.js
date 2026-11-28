@@ -198,3 +198,30 @@ export const fetchAiMatchAnalysis = async ({ local, visitante, liga, homeRecent,
   });
   return data;
 };
+
+export const guardarQuinielaApi = async (nombreJornada, selecciones) => {
+  try {
+    const { data } = await http.post('/quinielas', { nombreJornada, selecciones });
+    return data; // { quiniela, smsEnviado, whatsappEnviado }
+  } catch (error) {
+    throw new Error(getErrorMessage(error, 'No se pudo guardar la quiniela.'));
+  }
+};
+
+export const listarQuinielasApi = async ({ page = 0, size = 10 } = {}) => {
+  try {
+    const { data } = await http.get('/quinielas', { params: { page, size } });
+    return data;
+  } catch (error) {
+    throw new Error(getErrorMessage(error, 'No se pudieron cargar tus quinielas.'));
+  }
+};
+
+export const obtenerQuinielaApi = async (id) => {
+  try {
+    const { data } = await http.get(`/quinielas/${id}`);
+    return data;
+  } catch (error) {
+    throw new Error(getErrorMessage(error, 'No se pudo obtener el detalle de la quiniela.'));
+  }
+};
