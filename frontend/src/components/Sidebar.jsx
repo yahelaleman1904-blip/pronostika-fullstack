@@ -7,6 +7,7 @@ import {
   UserCircle,
   ShieldCheck,
 } from 'lucide-react';
+import { FOOTBALL_MENU_ITEMS } from '../navigation/footballViews';
 
 export default function Sidebar({ activeView, setActiveView, user }) {
   const isAdmin = (user?.rol || '').toUpperCase().includes('ADMIN');
@@ -15,6 +16,7 @@ export default function Sidebar({ activeView, setActiveView, user }) {
     { id: 'partidos', label: 'Partidos', icon: Calendar },
     { id: 'predicciones', label: 'Predicciones', icon: Target },
     { id: 'quiniela', label: 'Mi Quiniela', icon: ListChecks },
+    ...FOOTBALL_MENU_ITEMS,
     { id: 'estadisticas', label: 'Estadísticas', icon: BarChart3 },
     { id: 'perfil', label: 'Mi Perfil', icon: UserCircle },
     ...(isAdmin ? [{ id: 'admin', label: 'Usuarios', icon: ShieldCheck }] : []),
