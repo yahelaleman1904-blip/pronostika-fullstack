@@ -1,48 +1,38 @@
 # Pronostika
 
-Plataforma web de pronósticos y quinielas de fútbol. Backend en **Spring Boot** con **MySQL 8** y **Flyway**, frontend en **React + Vite + Tailwind** (modo oscuro).
+Plataforma web full-stack de pronósticos deportivos, análisis táctico y quinielas de fútbol. Desarrollada con **Spring Boot 4**, **MySQL 8**, **Flyway**, **React 19 + Vite + Tailwind CSS 4**, **ESPN API**, **Gemini AI** y **Twilio (WhatsApp / SMS)**.
 
-> Borrador del README: cada integrante completa la sección de su módulo.
+- **Despliegue en producción (Vultr VPS):** `http://216.238.94.85:8088`
 
 ## Tecnologías
 
 | Capa | Tecnologías |
 |------|-------------|
-| Backend | Java 17, Spring Boot 4, Spring Data JPA, Spring Security + JWT, Bean Validation, Flyway, Spring Mail, Twilio SDK |
-| Base de datos | MySQL 8.0 (`pronostika_db`) |
-| Frontend | React 19, Vite, Tailwind CSS 4, React Router, Axios, lucide-react |
-| Pruebas de API | Bruno (`bruno/`) |
+| Backend | Java 17, Spring Boot 4, Spring Data JPA, Spring Security + JWT, Bean Validation, Flyway, Spring Mail, Twilio SDK 10.6 |
+| Base de datos | MySQL 8.0 (`pronostika_db`, 8 tablas gestionadas con Flyway) |
+| Frontend | React 19, Vite, Tailwind CSS 4, Axios, lucide-react |
+| Integraciones | ESPN Public Sports API, Google Gemini AI, Gmail SMTP, Twilio WhatsApp/SMS Sandbox |
+| Infraestructura y Pruebas | Ubuntu + Nginx + systemd (`deploy/`), JUnit 5 (`backend/src/test/`), Bruno (`bruno/`) |
 
 ## Estructura del repositorio
 
 ```
 pronostika-fullstack/
-├── backend/                 API REST (Spring Boot)
-│   └── src/main/
-│       ├── java/com/pronostika/backend/
-│       │   ├── config/      configuración (seguridad por método)
-│       │   ├── controller/  controladores REST
-│       │   ├── dto/         DTOs con Bean Validation
-│       │   ├── entity/      entidades JPA (8 tablas)
-│       │   ├── exception/   manejo global de errores
-│       │   ├── repository/  repositorios Spring Data
-│       │   └── service/     lógica de negocio (incluye TwilioService)
-│       └── resources/
-│           ├── db/migration/V1__schema.sql
-│           ├── templates/   plantillas HTML de correo
-│           └── application.properties.example
-├── frontend/                SPA en React
+├── backend/                 API REST (Spring Boot + Flyway + JUnit 5)
+├── frontend/                SPA en React + Vite + vistas estilo Sofascore
+├── bruno/                   Colección completa de pruebas HTTP (01-auth a 07-sports-ia)
 ├── database/diagrama-er.png Diagrama entidad-relación
-└── bruno/                   Colección de pruebas de la API
+├── deploy/                  Configuración Nginx, unidad systemd y script de despliegue VPS
+└── docs/                    Guías técnicas (Twilio WhatsApp Sandbox)
 ```
 
 ## Base de datos
 
-El esquema lo crea Flyway con `V1__schema.sql` (8 tablas): `roles`, `usuarios`, `ligas`, `partidos`, `pronosticos`, `quinielas`, `quiniela_partidos` (pivote N:M) y `tokens_invalidados`.
+El esquema lo crea Flyway mediante `V1__schema.sql` con 8 tablas: `roles`, `usuarios`, `ligas`, `partidos`, `pronosticos`, `quinielas`, `quiniela_partidos` (tabla pivote N:M) y `tokens_invalidados`.
 
 ![Diagrama ER](database/diagrama-er.png)
 
-## Puesta en marcha
+## Puesta en marcha local
 
 ### 1. Base de datos
 
@@ -52,16 +42,21 @@ CREATE DATABASE pronostika_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 ### 2. Backend
 
-1. Copia `backend/src/main/resources/application.properties.example` como `application.properties` (está en `.gitignore`, **no se sube**).
-2. Llena tus datos locales: usuario y contraseña de MySQL, `jwt.secret` y, si los tienes, los datos de Twilio.
+1. Copia `backend/src/main/resources/application.properties.example` como `application.properties` (ignorado en Git).
+2. Completa tus credenciales de MySQL, `jwt.secret`, correo SMTP, `gemini.api-key` y Twilio Sandbox.
 3. Ejecuta desde `backend/`:
 
 ```bash
-./mvnw spring-boot:run          # Linux / macOS / Git Bash
-mvnw.cmd spring-boot:run        # Windows (CMD o PowerShell)
+./mvnw spring-boot:run          # Linux / macOS
+mvnw.cmd spring-boot:run        # Windows (PowerShell / CMD)
 ```
 
-La API queda en `http://localhost:8080/api`.
+Para ejecutar las pruebas unitarias:
+
+```bash
+cd backend
+./mvnw test
+```
 
 ### 3. Frontend
 
@@ -71,53 +66,64 @@ npm install
 npm run dev
 ```
 
-Opcional: crea `frontend/.env` con `VITE_API_URL=http://localhost:8080/api` si el backend corre en otra dirección.
+## Endpoints principales de la API
 
-## Endpoints de los módulos
+Todas las respuestas utilizan DTOs y manejo global de errores (`{ timestamp, status, error, mensaje, ruta, campos }`).
 
-Todas las respuestas usan DTOs; nunca se exponen entidades JPA. Los errores siguen el formato `{ timestamp, status, error, mensaje, ruta, campos }`.
+### Autenticación y verificación (`/api/auth`)
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| POST | `/api/auth/login` | Inicio de sesión y emisión de token JWT |
+| POST | `/api/auth/register` | Registro de usuario con contraseña segura |
+| POST | `/api/auth/logout` | Cierre de sesión e invalidación del JWT |
+| POST | `/api/auth/email/enviar-codigo` | Envío de código OTP de verificación por correo |
+| POST | `/api/auth/email/verificar-codigo` | Validación de código OTP |
+| POST | `/api/auth/recuperar-password` | Solicitud de código de recuperación |
+| POST | `/api/auth/restablecer-password` | Cambio de contraseña mediante código temporal |
+
+### Pronósticos e Inteligencia Deportiva (`/api/pronosticos`, `/api/sports`)
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| GET | `/api/pronosticos?page=0&size=10&liga=&search=` | Listado paginado y filtrado de pronósticos |
+| POST | `/api/pronosticos` | Alta de pronóstico (`ADMIN` / `ANALISTA`) |
+| PUT | `/api/pronosticos/{id}` | Edición de pronóstico (`ADMIN` / `ANALISTA`) |
+| DELETE | `/api/pronosticos/{id}` | Eliminación de pronóstico (`ADMIN` / `ANALISTA`) |
+| GET | `/api/sports/match-details` | Plantillas y últimos 5 resultados reales desde ESPN |
+| POST | `/api/sports/ai-analysis` | Análisis táctico generado con Gemini AI |
 
 ### Administración de usuarios (`ROLE_ADMIN`)
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
-| GET | `/api/admin/usuarios?buscar=&page=0&size=10&sort=nombre,asc` | Listado paginado en servidor con filtro por nombre o correo |
+| GET | `/api/admin/usuarios?buscar=&page=0&size=10` | Listado paginado con búsqueda |
 | GET | `/api/admin/usuarios/roles` | Roles disponibles |
-| GET | `/api/admin/usuarios/{id}` | Detalle de un usuario |
-| POST | `/api/admin/usuarios` | Alta de usuario |
-| PUT | `/api/admin/usuarios/{id}` | Edición de datos |
-| PATCH | `/api/admin/usuarios/{id}/rol` | Cambio de rol (`ADMIN`, `ANALISTA`, `USUARIO`) |
-| DELETE | `/api/admin/usuarios/{id}` | Eliminación |
+| POST / PUT / PATCH / DELETE | `/api/admin/usuarios` | Alta, edición, cambio de rol y baja |
 
-### Quinielas (usuario autenticado)
+### Quinielas y Perfil (usuario autenticado)
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
-| GET | `/api/quinielas?page=0&size=10` | Mis quinielas, más recientes primero |
-| GET | `/api/quinielas/{id}` | Detalle con partidos (dueño o admin) |
-| POST | `/api/quinielas` | Guarda la quiniela y sus partidos (N:M) y envía confirmación por SMS y WhatsApp |
+| GET | `/api/quinielas?page=0&size=10` | Historial de quinielas del usuario |
+| GET | `/api/quinielas/{id}` | Detalle de partidos y selecciones |
+| POST | `/api/quinielas` | Guarda quiniela N:M y envía confirmación por WhatsApp/SMS |
+| GET / PUT | `/api/perfil` | Consulta y edición de teléfono (WhatsApp/SMS) y avatar |
 
-### Perfil (usuario autenticado)
+## Notificaciones y Despliegue
 
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| GET | `/api/perfil` | Datos del usuario en sesión |
-| PUT | `/api/perfil` | Edita teléfono (para SMS/WhatsApp) y avatar |
-
-## Notificaciones
-
-- **Twilio** (`TwilioService`): `enviarSms` y `enviarWhatsapp`. Si las credenciales están vacías o con los valores de ejemplo, solo deja un aviso en el log y la operación continúa.
-- **Correo**: plantillas en `backend/src/main/resources/templates/` (`bienvenida.html`, `recuperar-password.html`, `confirmacion-quiniela.html`) con variables `{{nombre}}`, `{{folio}}`, etc.
+- **Twilio WhatsApp / SMS:** consulta la guía en [`docs/twilio-whatsapp.md`](docs/twilio-whatsapp.md).
+- **Despliegue en Vultr VPS:** consulta [`deploy/README.md`](deploy/README.md).
 
 ## Pruebas con Bruno
 
-1. Abre Bruno → *Open Collection* → carpeta `bruno/`.
-2. Selecciona el entorno **Local** y escribe `adminPassword` y `usuarioPassword` (variables secretas, se guardan solo en tu equipo).
-3. Ejecuta primero `01-auth` para guardar los JWT y después el resto de carpetas. `05-errores` contiene los casos 400, 401, 403, 404 y 409.
+1. Abre Bruno -> *Open Collection* -> carpeta `bruno/`.
+2. Selecciona el entorno **Local** o **Produccion-VPS** y configura las contraseñas secretas.
+3. Ejecuta `01-auth` para obtener el JWT y prueba las carpetas `02` a `07`.
 
 ## Equipo
 
 | Integrante | Módulos |
 |------------|---------|
-| Carlos Yahel Alemán Cruz | Estructura base, esquema Flyway, frontend inicial |
-| Mario Eduardo Grajales Ramírez | Admin de usuarios, quinielas, perfil, Twilio, plantillas de correo, diagrama ER, colección Bruno |
+| Carlos Yahel Alemán Cruz | Arquitectura full-stack, Flyway, Auth/OTP, Pronósticos CRUD, ESPN + Gemini AI, integración Sofascore/Quiniela/WhatsApp, despliegue VPS Vultr |
+| Mario Eduardo Grajales Ramírez | Admin de usuarios, quinielas, perfil, Twilio base, plantillas de correo, vistas Sofascore, diagrama ER, colección Bruno inicial |
