@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Activity,
   Target,
@@ -6,7 +6,6 @@ import {
   Flame,
   ArrowUpRight,
   Sparkles,
-  CheckCircle2,
 } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
@@ -15,6 +14,7 @@ import MatchCardsGrid from '../components/MatchCardsGrid';
 import MatchDetailPage from './MatchDetailPage';
 import CrudModal from '../components/CrudModal';
 import ConfirmModal from '../components/ConfirmModal';
+import Toast from '../components/Toast';
 import ProfilePage from './ProfilePage';
 import AdminUsersPage from './AdminUsersPage';
 import FootballHub from './FootballHub';
@@ -32,7 +32,7 @@ export default function DashboardPage({ user, onLogout }) {
   const [matches, setMatches] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
-  const [toastMsg, setToastMsg] = useState('');
+  const [toast, setToast] = useState({ message: '', type: 'success' });
 
   // Estado interactivo para la vista "Mi Quiniela"
   const [quinielaPicks, setQuinielaPicks] = useState({});
@@ -100,10 +100,13 @@ export default function DashboardPage({ user, onLogout }) {
     loadData();
   }, []);
 
-  const showToast = (msg) => {
-    setToastMsg(msg);
-    setTimeout(() => setToastMsg(''), 3500);
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type });
   };
+
+  const closeToast = useCallback(() => {
+    setToast({ message: '', type: 'success' });
+  }, []);
 
   const categories = Array.from(new Set(matches.map((m) => m.category)));
 
@@ -130,7 +133,7 @@ export default function DashboardPage({ user, onLogout }) {
       setIsCrudModalOpen(false);
       setEditingItem(null);
     } catch (err) {
-      alert(err.message);
+      showToast(err.message, 'error');
     }
   };
 
@@ -143,7 +146,7 @@ export default function DashboardPage({ user, onLogout }) {
       showToast('Pronóstico eliminado correctamente.');
       setItemToDelete(null);
     } catch (err) {
-      alert(err.message);
+      showToast(err.message, 'error');
     } finally {
       setIsDeleting(false);
     }
@@ -156,7 +159,7 @@ export default function DashboardPage({ user, onLogout }) {
   const handleGuardarQuiniela = async () => {
     const entradas = Object.entries(quinielaPicks);
     if (entradas.length === 0) {
-      showToast('Selecciona al menos un partido antes de guardar.');
+      showToast('Selecciona al menos un partido antes de guardar.', 'error');
       return;
     }
 
@@ -174,7 +177,7 @@ export default function DashboardPage({ user, onLogout }) {
     );
 
     if (selecciones.length === 0) {
-      showToast('No se encontraron partidos válidos para guardar.');
+      showToast('No se encontraron partidos válidos para guardar.', 'error');
       return;
     }
 
@@ -189,7 +192,7 @@ export default function DashboardPage({ user, onLogout }) {
       showToast(`Quiniela #${res.quiniela.id} registrada. ${canal}`);
       setQuinielaPicks({});
     } catch (err) {
-      showToast(err.message);
+      showToast(err.message, 'error');
     } finally {
       setIsSavingQuiniela(false);
     }
@@ -202,7 +205,7 @@ export default function DashboardPage({ user, onLogout }) {
     ? Math.round((acertadasCount / matches.length) * 100)
     : 68;
 
-    if (selectedMatch) {
+  if (selectedMatch) {
     return (
       <MatchDetailPage
         match={selectedMatch}
@@ -216,7 +219,7 @@ export default function DashboardPage({ user, onLogout }) {
     );
   }
 
-return (
+  return (
     <div className="relative min-h-screen flex bg-[#0F172A] text-[#F8FAFC] overflow-x-clip bg-grain">
       {/* Fondo ambiental sutil con movimiento lento */}
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
@@ -254,13 +257,6 @@ return (
                   Revisa tus pronósticos, gestiona tu quiniela y analiza las probabilidades de la jornada.
                 </p>
               </div>
-
-              {toastMsg && (
-                <div className="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-[#10B981]/15 border border-[#10B981]/35 text-[#10B981] text-xs font-semibold shadow-lg shadow-[#10B981]/10 backdrop-blur-md">
-                  <CheckCircle2 className="w-4 h-4 shrink-0" />
-                  <span>{toastMsg}</span>
-                </div>
-              )}
             </div>
 
             {/* Tarjetas KPI con efecto cristal */}
@@ -555,6 +551,12 @@ return (
         onCancel={() => setItemToDelete(null)}
         onConfirm={handleConfirmDelete}
         isDeleting={isDeleting}
+      />
+
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        onClose={closeToast}
       />
     </div>
   );
