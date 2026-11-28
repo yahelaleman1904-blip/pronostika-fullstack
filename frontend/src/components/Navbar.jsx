@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Bell, LogOut, Plus, CheckCircle2, Flame } from 'lucide-react';
+import { FOOTBALL_TITLES } from '../navigation/footballViews';
 
 export default function Navbar({ user, activeView, onLogout, onQuickAdd }) {
   const [notifOpen, setNotifOpen] = useState(false);
@@ -9,6 +10,9 @@ export default function Navbar({ user, activeView, onLogout, onQuickAdd }) {
     partidos: 'Partidos de la Jornada',
     quiniela: 'Mi Quiniela Interactiva',
     estadisticas: 'Estadísticas y Rendimiento',
+    perfil: 'Mi Perfil',
+    admin: 'Gestión de Usuarios',
+    ...FOOTBALL_TITLES,
   };
 
   const firstName = user?.nombre || user?.firstName || 'Analista';
