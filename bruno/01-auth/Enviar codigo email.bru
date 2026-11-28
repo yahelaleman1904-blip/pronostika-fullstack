@@ -1,0 +1,28 @@
+meta {
+  name: Enviar codigo email
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/auth/email/enviar-codigo
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "{{usuarioEmail}}",
+    "nombre": "Yahel"
+  }
+}
+
+tests {
+  test("responde 200", function () {
+    expect(res.status).to.equal(200);
+  });
+}
+
+docs {
+Solicita el envío del código OTP de 6 dígitos al correo electrónico para validar el registro.
+}
