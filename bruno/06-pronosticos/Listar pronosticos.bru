@@ -1,0 +1,29 @@
+meta {
+  name: Listar pronosticos
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/pronosticos?page=0&size=10
+  body: none
+  auth: none
+}
+
+params:query {
+  page: 0
+  size: 10
+}
+
+tests {
+  test("responde 200", function () {
+    expect(res.status).to.equal(200);
+  });
+  test("regresa pagina de pronosticos", function () {
+    expect(res.body.content).to.be.an("array");
+  });
+}
+
+docs {
+Lista los pronósticos paginados con soporte opcional para filtros por texto (search) y liga.
+}
