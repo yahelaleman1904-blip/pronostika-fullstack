@@ -259,7 +259,7 @@ export default function TeamPage({ team, onBack, onOpenTeam, onOpenLeague }) {
           </section>
         </div>
       ) : (
-        <div key="plantilla" className="grid gap-4 lg:grid-cols-2 stagger">
+        <div key="plantilla" className="grid gap-4 lg:grid-cols-2 items-start stagger">
           {grouped.map(({ group, players }, i) => (
             <SquadGroup key={group.id} group={group} players={players} defaultOpen={i < 2} />
           ))}
