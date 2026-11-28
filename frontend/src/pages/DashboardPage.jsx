@@ -15,6 +15,7 @@ import MatchDetailPage from './MatchDetailPage';
 import CrudModal from '../components/CrudModal';
 import ConfirmModal from '../components/ConfirmModal';
 import Toast from '../components/Toast';
+import QuinielaHistory from '../components/QuinielaHistory';
 import ProfilePage from './ProfilePage';
 import AdminUsersPage from './AdminUsersPage';
 import FootballHub from './FootballHub';
@@ -37,6 +38,7 @@ export default function DashboardPage({ user, onLogout }) {
   // Estado interactivo para la vista "Mi Quiniela"
   const [quinielaPicks, setQuinielaPicks] = useState({});
   const [isSavingQuiniela, setIsSavingQuiniela] = useState(false);
+  const [quinielaRefreshKey, setQuinielaRefreshKey] = useState(0);
 
   // Filtros
   const [searchTerm, setSearchTerm] = useState('');
@@ -191,6 +193,7 @@ export default function DashboardPage({ user, onLogout }) {
         : 'Quiniela guardada (revisa tu teléfono en Mi Perfil o Twilio).';
       showToast(`Quiniela #${res.quiniela.id} registrada. ${canal}`);
       setQuinielaPicks({});
+      setQuinielaRefreshKey((prev) => prev + 1);
     } catch (err) {
       showToast(err.message, 'error');
     } finally {
@@ -367,6 +370,7 @@ export default function DashboardPage({ user, onLogout }) {
                 onSelectForEdit={(item) => setSelectedMatch(item)}
               />
             ) : activeView === 'quiniela' ? (
+              <div className="space-y-6">
               <div className="glass-panel rounded-2xl p-6 space-y-5">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/8 pb-5">
                   <div>
@@ -426,6 +430,8 @@ export default function DashboardPage({ user, onLogout }) {
                     );
                   })}
                 </div>
+              </div>
+              <QuinielaHistory refreshKey={quinielaRefreshKey} />
               </div>
             ) : activeView === 'estadisticas' ? (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
