@@ -210,11 +210,14 @@ export function getFixtures(dateKey, now = new Date()) {
   const diffDays = Math.round((day - today) / 86400000);
   const fixtures = [];
 
-  LEAGUES.forEach((league) => {
+  const dayNumber = Math.round(day.getTime() / 86400000);
+
+  LEAGUES.forEach((league, leagueIndex) => {
+    // Cada liga juega un día sí y dos no, para que un equipo no tenga partido diario.
+    if ((dayNumber + leagueIndex) % 3 !== 0) return;
     const rand = seeded(`${league.id}-${dateKey}`);
-    if (rand() < 0.25) return; // algunas ligas no juegan ese día
     const teams = [...league.equipos].sort(() => rand() - 0.5);
-    const count = 1 + Math.floor(rand() * 3);
+    const count = 2 + Math.floor(rand() * 3);
 
     for (let i = 0; i < count && i * 2 + 1 < teams.length; i += 1) {
       const local = teams[i * 2];
