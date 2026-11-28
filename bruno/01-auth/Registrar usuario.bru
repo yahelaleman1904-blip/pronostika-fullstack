@@ -1,0 +1,31 @@
+meta {
+  name: Registrar usuario
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/auth/register
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "nombre": "Carlos",
+    "apellido": "Prueba",
+    "email": "nuevo.usuario@pronostika.com",
+    "password": "Password1!",
+    "telefono": "+529511234567"
+  }
+}
+
+tests {
+  test("responde 201 o 409 si ya existe", function () {
+    expect([201, 409]).to.include(res.status);
+  });
+}
+
+docs {
+Registra una cuenta nueva con contraseña segura y teléfono opcional para notificaciones por WhatsApp/SMS.
+}
