@@ -17,6 +17,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import com.pronostika.backend.dto.QuinielaPartidoDTO;
 import com.pronostika.backend.dto.CrearQuinielaDTO;
 import com.pronostika.backend.dto.PaginaDTO;
 import com.pronostika.backend.dto.QuinielaDTO;
@@ -72,9 +73,10 @@ public class QuinielaService {
         boolean whatsapp = false;
         String telefono = guardado.telefono();
         if (telefono != null && !telefono.isBlank()) {
-            String mensaje = mensajeConfirmacion(guardado.nombre(), guardado.quiniela());
-            sms = twilioService.enviarSms(telefono, mensaje);
-            whatsapp = twilioService.enviarWhatsapp(telefono, mensaje);
+            String mensajeSms = mensajeConfirmacion(guardado.nombre(), guardado.quiniela());
+            String mensajeWa = mensajeWhatsapp(guardado.nombre(), guardado.quiniela());
+            sms = twilioService.enviarSms(telefono, mensajeSms);
+            whatsapp = twilioService.enviarWhatsapp(telefono, mensajeWa);
         }
         return new QuinielaGuardadaDTO(guardado.quiniela(), sms, whatsapp);
     }
@@ -137,6 +139,33 @@ public class QuinielaService {
         return "Pronostika: Hola " + nombre + ", tu quiniela \"" + q.nombreJornada()
                 + "\" (folio #" + q.id() + ") quedó registrada con " + q.totalPartidos()
                 + " partidos. Primer partido: " + primera + ". ¡Suerte!";
+    }
+
+
+    private static String mensajeWhatsapp(String nombre, QuinielaDTO q) {
+        String primera = q.partidos().stream()
+                .map(p -> p.fechaPartido())
+                .filter(f -> f != null)
+                .min(Comparable::compareTo)
+                .map(FORMATO_FECHA::format)
+                .orElse("por definir");
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("*Pronostika · Confirmación de Quiniela*\n");
+        sb.append("Hola ").append(nombre).append(", tu quiniela quedó registrada.\n\n");
+        sb.append("*Jornada:* ").append(q.nombreJornada()).append("\n");
+        sb.append("*Folio:* #").append(q.id()).append("\n");
+        sb.append("*Primer partido:* ").append(primera).append("\n\n");
+        sb.append("*Tus predicciones (").append(q.totalPartidos()).append("):*\n");
+
+        for (QuinielaPartidoDTO p : q.partidos()) {
+            sb.append("• ")
+              .append(p.equipoLocal()).append(" vs ").append(p.equipoVisitante())
+              .append(" → *").append(p.seleccion()).append("*\n");
+        }
+
+        sb.append("\n¡Mucha suerte en la jornada!");
+        return sb.toString();
     }
 
     private record Guardado(QuinielaDTO quiniela, String nombre, String telefono) {
